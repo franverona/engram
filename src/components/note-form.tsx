@@ -6,13 +6,14 @@ import { trpc } from '@/trpc/react'
 
 export function NoteForm() {
   const router = useRouter()
+  const utils = trpc.useUtils()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
 
   const createNote = trpc.notes.create.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await utils.notes.list.invalidate()
       router.push('/')
-      router.refresh()
     },
   })
 
@@ -22,7 +23,7 @@ export function NoteForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label htmlFor="title" className="block text-sm font-medium">
           Title
@@ -33,31 +34,55 @@ export function NoteForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+          placeholder="Give your note a title..."
+          className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
       <div>
-        <label htmlFor="body" className="block text-sm font-medium">
-          Body
-        </label>
+        <div className="flex items-center justify-between">
+          <label htmlFor="body" className="block text-sm font-medium">
+            Body
+          </label>
+          <span className="text-xs text-text-faint">{body.length} characters</span>
+        </div>
         <textarea
           id="body"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           required
-          rows={8}
-          className="mt-1 block w-full rounded border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+          rows={10}
+          placeholder="Write your note..."
+          className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
       <button
         type="submit"
-        disabled={createNote.isPending}
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        disabled={createNote.isPending || !title.trim() || !body.trim()}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
       >
-        {createNote.isPending ? 'Saving...' : 'Save Note'}
+        {createNote.isPending ? (
+          <>
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
+            </svg>
+            Saving...
+          </>
+        ) : (
+          <>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save Note
+          </>
+        )}
       </button>
       {createNote.error && (
-        <p className="text-sm text-red-600">{createNote.error.message}</p>
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {createNote.error.message}
+        </p>
       )}
     </form>
   )

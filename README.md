@@ -9,6 +9,7 @@ A local-first notes app with semantic search and RAG chat. Everything runs on yo
 - **Drizzle ORM** + **better-sqlite3** for persistence
 - **sqlite-vec** for vector similarity search
 - **Vercel AI SDK** + **Ollama** for embeddings and chat
+- **Husky** + **lint-staged** + **commitlint** for Conventional Commits enforcement
 
 ## Prerequisites
 
@@ -26,7 +27,7 @@ ollama pull nomic-embed-text
 
 ```bash
 npm install
-cp .env.example .env.local   # edit if needed
+cp .env.example .env.local   # optional — defaults work without it
 npx drizzle-kit push          # create/migrate the database
 npm run dev
 ```

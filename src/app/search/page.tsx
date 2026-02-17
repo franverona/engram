@@ -15,15 +15,46 @@ export default function SearchPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Semantic Search</h1>
+      <h1 className="mb-2 text-2xl font-bold">Semantic Search</h1>
+      <p className="mb-6 text-sm text-text-muted">
+        Search your notes using natural language. Results are ranked by meaning, not just keywords.
+      </p>
       <div className="space-y-6">
         <SearchBar
           onSearch={setQuery}
           isLoading={searchQuery.isFetching}
         />
+        {searchQuery.isFetching && !searchQuery.data && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+                <div className="flex items-start justify-between">
+                  <div className="h-5 w-1/3 animate-pulse rounded bg-border" />
+                  <div className="h-5 w-16 animate-pulse rounded-full bg-border" />
+                </div>
+                <div className="mt-3 h-4 w-full animate-pulse rounded bg-border" />
+                <div className="mt-2 h-4 w-2/3 animate-pulse rounded bg-border" />
+              </div>
+            ))}
+          </div>
+        )}
         {searchQuery.data && <SearchResults results={searchQuery.data} />}
         {searchQuery.error && (
-          <p className="text-sm text-red-600">{searchQuery.error.message}</p>
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+            {searchQuery.error.message}
+          </p>
+        )}
+        {!query && !searchQuery.data && (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-text-faint">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <p className="text-lg font-medium text-text-muted">Search your notes</p>
+            <p className="mt-1 text-sm text-text-faint">
+              Type a question or topic to find relevant notes
+            </p>
+          </div>
         )}
       </div>
     </div>

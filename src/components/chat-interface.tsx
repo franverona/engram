@@ -1,9 +1,9 @@
 'use client'
 
-import { useChat } from 'ai/react'
+import { useChat } from '@ai-sdk/react'
 
 export function ChatInterface() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+  const { messages, input, handleInputChange, handleSubmit, status } =
     useChat({ api: '/api/chat' })
 
   return (
@@ -42,7 +42,7 @@ export function ChatInterface() {
         />
         <button
           type="submit"
-          disabled={isLoading || !input.trim()}
+          disabled={status !== 'ready' || !input.trim()}
           className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           Send

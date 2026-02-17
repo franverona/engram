@@ -1,11 +1,11 @@
-import "dotenv/config";
-import { defineConfig } from "drizzle-kit";
+import 'dotenv/config'
+import { defineConfig } from 'drizzle-kit'
 
 export default defineConfig({
-  schema: "./src/lib/db/schema.ts",
-  out: "./drizzle",
-  dialect: "sqlite",
+  schema: './src/lib/db/schema.ts',
+  out: './drizzle',
+  dialect: 'sqlite',
   dbCredentials: {
-    url: process.env.DATABASE_PATH ?? "./data/engram.db",
+    url: process.env.DATABASE_PATH ?? './data/engram.db',
   },
-});
+})

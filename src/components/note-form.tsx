@@ -1,25 +1,25 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { trpc } from "@/trpc/react";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { trpc } from '@/trpc/react'
 
 export function NoteForm() {
-  const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const router = useRouter()
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
 
   const createNote = trpc.notes.create.useMutation({
     onSuccess: () => {
-      router.push("/");
-      router.refresh();
+      router.push('/')
+      router.refresh()
     },
-  });
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createNote.mutate({ title, body });
-  };
+    e.preventDefault()
+    createNote.mutate({ title, body })
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,11 +54,11 @@ export function NoteForm() {
         disabled={createNote.isPending}
         className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {createNote.isPending ? "Saving..." : "Save Note"}
+        {createNote.isPending ? 'Saving...' : 'Save Note'}
       </button>
       {createNote.error && (
         <p className="text-sm text-red-600">{createNote.error.message}</p>
       )}
     </form>
-  );
+  )
 }

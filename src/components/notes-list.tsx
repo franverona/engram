@@ -1,18 +1,18 @@
-"use client";
+'use client'
 
-import { trpc } from "@/trpc/react";
+import { trpc } from '@/trpc/react'
 
 export function NotesList() {
-  const { data: notesList, isLoading } = trpc.notes.list.useQuery();
-  const utils = trpc.useUtils();
+  const { data: notesList, isLoading } = trpc.notes.list.useQuery()
+  const utils = trpc.useUtils()
 
   const deleteNote = trpc.notes.delete.useMutation({
     onSuccess: () => utils.notes.list.invalidate(),
-  });
+  })
 
-  if (isLoading) return <p className="text-gray-500">Loading notes...</p>;
+  if (isLoading) return <p className="text-gray-500">Loading notes...</p>
   if (!notesList?.length)
-    return <p className="text-gray-500">No notes yet. Create one!</p>;
+    return <p className="text-gray-500">No notes yet. Create one!</p>
 
   return (
     <ul className="space-y-4">
@@ -40,5 +40,5 @@ export function NotesList() {
         </li>
       ))}
     </ul>
-  );
+  )
 }

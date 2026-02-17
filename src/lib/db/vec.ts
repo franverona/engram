@@ -1,6 +1,6 @@
-import type Database from "better-sqlite3";
+import type Database from 'better-sqlite3'
 
-const EMBEDDING_DIM = parseInt(process.env.EMBEDDING_DIMENSION ?? "768", 10);
+const EMBEDDING_DIM = parseInt(process.env.EMBEDDING_DIMENSION ?? '768', 10)
 
 export function initVecTable(db: Database.Database) {
   db.exec(`
@@ -8,7 +8,7 @@ export function initVecTable(db: Database.Database) {
       note_id INTEGER PRIMARY KEY,
       embedding float[${EMBEDDING_DIM}]
     )
-  `);
+  `)
 }
 
 export function upsertEmbedding(
@@ -17,8 +17,8 @@ export function upsertEmbedding(
   embedding: Float32Array,
 ) {
   db.prepare(
-    `INSERT OR REPLACE INTO note_embeddings (note_id, embedding) VALUES (?, ?)`,
-  ).run(BigInt(noteId), Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength));
+    'INSERT OR REPLACE INTO note_embeddings (note_id, embedding) VALUES (?, ?)',
+  ).run(BigInt(noteId), Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength))
 }
 
 export function searchEmbeddings(
@@ -37,9 +37,9 @@ export function searchEmbeddings(
     .all(Buffer.from(queryEmbedding.buffer), limit) as {
     note_id: number;
     distance: number;
-  }[];
+  }[]
 }
 
 export function deleteEmbedding(db: Database.Database, noteId: number) {
-  db.prepare(`DELETE FROM note_embeddings WHERE note_id = ?`).run(BigInt(noteId));
+  db.prepare('DELETE FROM note_embeddings WHERE note_id = ?').run(BigInt(noteId))
 }

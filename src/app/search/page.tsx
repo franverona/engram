@@ -1,17 +1,17 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { SearchBar } from "@/components/search-bar";
-import { SearchResults } from "@/components/search-results";
-import { trpc } from "@/trpc/react";
+import { useState } from 'react'
+import { SearchBar } from '@/components/search-bar'
+import { SearchResults } from '@/components/search-results'
+import { trpc } from '@/trpc/react'
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('')
 
   const searchQuery = trpc.search.semantic.useQuery(
     { query },
     { enabled: query.length > 0 },
-  );
+  )
 
   return (
     <div>
@@ -27,5 +27,5 @@ export default function SearchPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

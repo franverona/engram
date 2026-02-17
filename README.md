@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Engram
 
-## Getting Started
+A local-first notes app with semantic search and RAG chat. Everything runs on your machine using [Ollama](https://ollama.com) for embeddings and LLM inference.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS)
+- **tRPC** for type-safe API layer
+- **Drizzle ORM** + **better-sqlite3** for persistence
+- **sqlite-vec** for vector similarity search
+- **Vercel AI SDK** + **Ollama** for embeddings and chat
+
+## Prerequisites
+
+- Node.js 20+
+- [Ollama](https://ollama.com) installed and running
+
+Pull the required models:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+ollama pull llama3.1:8b
+ollama pull nomic-embed-text
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+cp .env.example .env.local   # edit if needed
+npx drizzle-kit push          # create/migrate the database
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+See `.env.example` for all available options. Defaults work out of the box if Ollama is running locally.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Default | Description |
+|---|---|---|
+| `OLLAMA_BASE_URL` | `http://localhost:11434/api` | Ollama API endpoint |
+| `OLLAMA_CHAT_MODEL` | `llama3.1:8b` | Model used for RAG chat |
+| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Model used for embeddings |
+| `EMBEDDING_DIMENSION` | `768` | Vector dimension (must match embedding model) |
+| `DATABASE_PATH` | `./data/engram.db` | SQLite database file path |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/              # Next.js pages and API routes
+    api/chat/       # Streaming RAG chat endpoint
+    api/trpc/       # tRPC handler
+    chat/           # Chat page
+    notes/new/      # Create note page
+    search/         # Semantic search page
+  components/       # React components
+  lib/
+    ai/             # Ollama provider, embedding generation
+    db/             # Drizzle schema, sqlite-vec helpers
+  trpc/             # tRPC router, React provider, server helpers
+data/               # SQLite database (gitignored)
+```

@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 type SearchResult = {
   id: number;
@@ -7,11 +7,11 @@ type SearchResult = {
   createdAt: string;
   updatedAt: string;
   distance: number;
-};
+}
 
 export function SearchResults({ results }: { results: SearchResult[] }) {
   if (results.length === 0) {
-    return <p className="text-gray-500">No results found.</p>;
+    return <p className="text-gray-500">No results found.</p>
   }
 
   return (
@@ -31,5 +31,5 @@ export function SearchResults({ results }: { results: SearchResult[] }) {
         </li>
       ))}
     </ul>
-  );
+  )
 }

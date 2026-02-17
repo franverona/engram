@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { useChat } from "ai/react";
+import { useChat } from 'ai/react'
 
 export function ChatInterface() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({ api: "/api/chat" });
+    useChat({ api: '/api/chat' })
 
   return (
     <div className="flex h-[600px] flex-col">
@@ -19,13 +19,13 @@ export function ChatInterface() {
           <div
             key={message.id}
             className={`rounded p-3 ${
-              message.role === "user"
-                ? "ml-8 bg-blue-50 dark:bg-blue-950"
-                : "mr-8 bg-gray-50 dark:bg-gray-800"
+              message.role === 'user'
+                ? 'ml-8 bg-blue-50 dark:bg-blue-950'
+                : 'mr-8 bg-gray-50 dark:bg-gray-800'
             }`}
           >
             <p className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-              {message.role === "user" ? "You" : "AI"}
+              {message.role === 'user' ? 'You' : 'AI'}
             </p>
             <p className="whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100">
               {message.content}
@@ -49,5 +49,5 @@ export function ChatInterface() {
         </button>
       </form>
     </div>
-  );
+  )
 }

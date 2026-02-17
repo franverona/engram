@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 
 export function SearchBar({
   onSearch,
@@ -9,12 +9,12 @@ export function SearchBar({
   onSearch: (query: string) => void;
   isLoading: boolean;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) onSearch(query.trim());
-  };
+    e.preventDefault()
+    if (query.trim()) onSearch(query.trim())
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
@@ -30,8 +30,8 @@ export function SearchBar({
         disabled={isLoading || !query.trim()}
         className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        {isLoading ? "Searching..." : "Search"}
+        {isLoading ? 'Searching...' : 'Search'}
       </button>
     </form>
-  );
+  )
 }

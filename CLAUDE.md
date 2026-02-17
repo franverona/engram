@@ -8,6 +8,7 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 
 - `npm run dev` — Start development server
 - `npm run build` — Production build
+- `npm start` — Run local environment via `zx ./local-env.mjs`
 - `npm run lint` — Run ESLint
 - `npx drizzle-kit push` — Push schema changes to SQLite database
 - `npx drizzle-kit studio` — Open Drizzle Studio to inspect the database
@@ -27,6 +28,8 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `better-sqlite3` and `sqlite-vec` must stay in `serverExternalPackages` in `next.config.ts`.
 - `sqliteVec.load()` is called on the raw better-sqlite3 `Database` instance, not the Drizzle wrapper.
 - When passing `Float32Array` to sqlite-vec, use `Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength)` to handle views correctly.
+- tRPC uses `superjson` as its transformer and `zod` for input validation.
+- Commits follow Conventional Commits. Husky + lint-staged + commitlint enforce linting and commit message format on pre-commit/commit-msg hooks.
 
 ## File Layout
 

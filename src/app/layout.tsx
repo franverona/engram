@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Link from 'next/link'
 import { TRPCProvider } from '@/trpc/react'
+import { MobileNav } from '@/components/mobile-nav'
+import { NavLink } from '@/components/nav-link'
 import './globals.css'
 
 const geistSans = Geist({
@@ -30,32 +32,41 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <TRPCProvider>
-          <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-            <div className="mx-auto flex max-w-4xl items-center gap-6 px-4 py-3">
-              <Link href="/" className="text-lg font-semibold">
-                Engram
-              </Link>
-              <Link
-                href="/notes/new"
-                className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-              >
-                New Note
-              </Link>
-              <Link
-                href="/search"
-                className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-              >
-                Search
-              </Link>
-              <Link
-                href="/chat"
-                className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-              >
-                Chat
-              </Link>
+          <nav className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
+            <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-6">
+                <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-primary"
+                  >
+                    <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z" />
+                    <path d="M9 21h6" />
+                    <path d="M10 21v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1" />
+                    <path d="M12 2v4" />
+                    <path d="M8 6l2 2" />
+                    <path d="M16 6l-2 2" />
+                  </svg>
+                  Engram
+                </Link>
+                <div className="hidden items-center gap-5 sm:flex">
+                  <NavLink href="/">Notes</NavLink>
+                  <NavLink href="/notes/new">New Note</NavLink>
+                  <NavLink href="/search">Search</NavLink>
+                  <NavLink href="/chat">Chat</NavLink>
+                </div>
+              </div>
+              <MobileNav />
             </div>
           </nav>
-          <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
+          <main className="mx-auto max-w-4xl px-4 py-8 pb-16">{children}</main>
         </TRPCProvider>
       </body>
     </html>

@@ -16,9 +16,11 @@ export function upsertEmbedding(
   noteId: number,
   embedding: Float32Array,
 ) {
-  db.prepare(
-    'INSERT OR REPLACE INTO note_embeddings (note_id, embedding) VALUES (?, ?)',
-  ).run(BigInt(noteId), Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength))
+  const buf = Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength)
+  db.transaction(() => {
+    db.prepare('DELETE FROM note_embeddings WHERE note_id = ?').run(BigInt(noteId))
+    db.prepare('INSERT INTO note_embeddings (note_id, embedding) VALUES (?, ?)').run(BigInt(noteId), buf)
+  })()
 }
 
 export function searchEmbeddings(

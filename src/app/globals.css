@@ -106,15 +106,6 @@ button, a, input, textarea {
   overflow: hidden;
 }
 
-/* Markdown prose styles — tighter variant for chat bubbles */
-.prose-chat {
-  line-height: 1.5;
-}
-
-.prose-chat p { margin-top: 0.4em; margin-bottom: 0.4em; }
-.prose-chat p:first-child { margin-top: 0; }
-.prose-chat p:last-child { margin-bottom: 0; }
-
 /* Markdown prose styles */
 .prose {
   color: var(--foreground);
@@ -256,3 +247,12 @@ button, a, input, textarea {
   border: 1px solid var(--border);
   padding: 0.5em 0.75em;
 }
+
+/* Tighter prose variant for chat bubbles — must come after .prose to win the cascade */
+.prose-chat {
+  line-height: 1.5;
+}
+
+.prose-chat p { margin-top: 0.4em; margin-bottom: 0.4em; }
+.prose-chat p:first-child { margin-top: 0; }
+.prose-chat p:last-child { margin-bottom: 0; }

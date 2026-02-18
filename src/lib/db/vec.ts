@@ -25,7 +25,7 @@ export function searchEmbeddings(
   db: Database.Database,
   queryEmbedding: Float32Array,
   limit = 5,
-): { note_id: number; distance: number }[] {
+): { note_id: number, distance: number }[] {
   return db
     .prepare(
       `SELECT note_id, distance
@@ -35,8 +35,8 @@ export function searchEmbeddings(
        LIMIT ?`,
     )
     .all(Buffer.from(queryEmbedding.buffer), limit) as {
-    note_id: number;
-    distance: number;
+    note_id: number
+    distance: number
   }[]
 }
 
@@ -47,7 +47,7 @@ export function deleteEmbedding(db: Database.Database, noteId: number) {
 export function getEmbeddingsByIds(
   db: Database.Database,
   noteIds: number[],
-): { note_id: number; embedding: Buffer }[] {
+): { note_id: number, embedding: Buffer }[] {
   if (noteIds.length === 0) {
     return []
   }
@@ -55,5 +55,5 @@ export function getEmbeddingsByIds(
   const placeholders = noteIds.map(() => '?').join(', ')
   return db
     .prepare(`SELECT note_id, embedding FROM note_embeddings WHERE note_id IN (${placeholders})`)
-    .all(...noteIds.map((id) => BigInt(id))) as { note_id: number; embedding: Buffer }[]
+    .all(...noteIds.map((id) => BigInt(id))) as { note_id: number, embedding: Buffer }[]
 }

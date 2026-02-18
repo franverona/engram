@@ -9,7 +9,7 @@ export function useToast() {
   return useContext(ToastContext)
 }
 
-function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+function Toast({ message, onClose }: { message: string, onClose: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000)
     return () => clearTimeout(timer)

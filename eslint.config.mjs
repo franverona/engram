@@ -28,6 +28,7 @@ const eslintConfig = defineConfig([
       '@stylistic/comma-spacing': ['error', { before: false, after: true }],
       '@stylistic/object-curly-spacing': ['error', 'always'],
       '@stylistic/arrow-spacing': ['error', { before: true, after: true }],
+      '@stylistic/member-delimiter-style': ['error', { multiline: { delimiter: 'none' }, singleline: { delimiter: 'comma', requireLast: false } }],
       '@stylistic/keyword-spacing': ['error', { before: true, after: true }],
       '@stylistic/space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
       'react/self-closing-comp': ['error', { component: true, html: true }],

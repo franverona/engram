@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   let context = ''
 
   if (lastUserMessage) {
-    const textContent = (lastUserMessage.parts as Array<{ type: string; text?: string }>)
+    const textContent = (lastUserMessage.parts as Array<{ type: string, text?: string }>)
       ?.filter((p) => p.type === 'text')
       .map((p) => p.text ?? '')
       .join('') ?? ''

@@ -20,7 +20,7 @@ function cosineSimilarity(a: Float32Array, b: Float32Array): number {
 // 0.0 = pure diversity, 0.5 (default) = equal weight.
 export function mmr(
   queryEmbedding: Float32Array,
-  candidates: { note_id: number; embedding: Float32Array }[],
+  candidates: { note_id: number, embedding: Float32Array }[],
   k: number,
   lambda = 0.5,
 ): number[] {

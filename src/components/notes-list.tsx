@@ -54,7 +54,7 @@ function EditButton({ href }: { href: string }) {
   )
 }
 
-function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void; isPending: boolean }) {
+function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void, isPending: boolean }) {
   const [confirming, setConfirming] = useState(false)
 
   if (confirming) {

@@ -8,9 +8,9 @@ export function NavLink({
   children,
   onClick,
 }: {
-  href: string;
-  children: React.ReactNode;
-  onClick?: () => void;
+  href: string
+  children: React.ReactNode
+  onClick?: () => void
 }) {
   const pathname = usePathname()
   const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)

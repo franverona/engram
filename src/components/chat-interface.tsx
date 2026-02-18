@@ -92,7 +92,7 @@ export function ChatInterface() {
               >
                 {message.parts
                   .filter((p) => p.type === 'text')
-                  .map((p) => (p as { type: 'text'; text: string }).text)
+                  .map((p) => (p as { type: 'text', text: string }).text)
                   .join('')}
               </p>
             </div>

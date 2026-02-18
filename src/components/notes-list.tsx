@@ -1,32 +1,9 @@
 'use client'
 
 import { trpc } from '@/trpc/react'
+import { useToast } from '@/components/toast'
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
-
-function Toast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000)
-    return () => clearTimeout(timer)
-  }, [onClose])
-
-  return (
-    <div className="fixed bottom-6 right-6 z-50 animate-[slideUp_0.2s_ease-out] rounded-lg border border-border bg-surface px-4 py-3 shadow-lg">
-      <div className="flex items-center gap-3">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <p className="text-sm font-medium">{message}</p>
-        <button onClick={onClose} className="ml-2 text-text-faint hover:text-foreground">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  )
-}
+import { useState } from 'react'
 
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr)
@@ -119,13 +96,12 @@ function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void; isPendi
 export function NotesList() {
   const { data: notesList, isLoading } = trpc.notes.list.useQuery()
   const utils = trpc.useUtils()
-  const [toast, setToast] = useState<string | null>(null)
-  const dismissToast = useCallback(() => setToast(null), [])
+  const { showToast } = useToast()
 
   const deleteNote = trpc.notes.delete.useMutation({
     onSuccess: () => {
       utils.notes.list.invalidate()
-      setToast('Note deleted successfully')
+      showToast('Note deleted successfully')
     },
   })
 
@@ -191,7 +167,6 @@ export function NotesList() {
           </li>
         ))}
       </ul>
-      {toast && <Toast message={toast} onClose={dismissToast} />}
     </>
   )
 }

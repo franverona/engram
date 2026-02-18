@@ -1,6 +1,7 @@
 'use client'
 
 import { trpc } from '@/trpc/react'
+import { useToast } from '@/components/toast'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -13,6 +14,7 @@ type NoteFormProps = {
 export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
   const router = useRouter()
   const utils = trpc.useUtils()
+  const { showToast } = useToast()
   const [title, setTitle] = useState(initialTitle || '')
   const [body, setBody] = useState(initialBody || '')
 
@@ -28,9 +30,12 @@ export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
     onError: (_err, _input, ctx) => {
       utils.notes.list.setData(undefined, ctx?.previous)
     },
+    onSuccess: () => {
+      showToast('Note updated successfully')
+      router.push('/')
+    },
     onSettled: () => {
       utils.notes.list.invalidate()
-      router.push('/')
     },
   })
 

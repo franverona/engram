@@ -10,6 +10,7 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `npm run build` — Production build
 - `npm start` — Run local environment via `zx ./local-env.mjs`
 - `npm run lint` — Run ESLint
+- `act pull_request` — Simulate the CI workflow locally (requires Docker + [act](https://github.com/nektos/act))
 - `npx drizzle-kit push` — Push schema changes to SQLite database
 - `npx drizzle-kit studio` — Open Drizzle Studio to inspect the database
 

@@ -42,8 +42,10 @@ export const notesRouter = createTRPCRouter({
         .set({ title: input.title, body: input.body })
         .where(eq(notes.id, input.id))
         .returning()
-        
-      await generateNoteEmbedding(`${updated.title}\n${updated.body}`)
+
+      const embedding = await generateNoteEmbedding(`${updated.title}\n${updated.body}`)
+      upsertEmbedding(sqlite, updated.id, embedding)
+
       return updated
     }),
 

@@ -7,15 +7,15 @@ import { trpc } from '@/trpc/react'
 
 function stripMarkdown(text: string): string {
   return text
+    .replace(/^```[\s\S]*?^```/gm, '')        // fenced code blocks (multi-line)
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images → alt text
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')  // links → label
     .replace(/^#{1,6}\s+/gm, '')              // headings
     .replace(/(\*\*|__)(.*?)\1/g, '$2')       // bold
     .replace(/([*_])(.*?)\1/g, '$2')          // italic
     .replace(/~~(.*?)~~/g, '$1')              // strikethrough
-    .replace(/`{1,3}[^`]*`{1,3}/g, '')        // inline code / fenced code
-    .replace(/^```[\s\S]*?```$/gm, '')         // code blocks
-    .replace(/^>\s+/gm, '')                    // blockquotes
+    .replace(/`[^`]*`/g, '')                  // inline code
+    .replace(/^>\s+/gm, '')                   // blockquotes
     .replace(/^[-*+]\s+/gm, '')               // unordered list markers
     .replace(/^\d+\.\s+/gm, '')               // ordered list markers
     .replace(/^-{3,}$/gm, '')                 // horizontal rules

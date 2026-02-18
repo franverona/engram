@@ -1,4 +1,4 @@
-import { streamText } from 'ai'
+import { streamText, convertToModelMessages } from 'ai'
 import { chatModel } from '@/lib/ai/ollama'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { sqlite } from '@/lib/db'
@@ -17,7 +17,11 @@ export async function POST(req: Request) {
   let context = ''
 
   if (lastUserMessage) {
-    const queryEmbedding = await generateNoteEmbedding(lastUserMessage.content)
+    const textContent = (lastUserMessage.parts as Array<{ type: string; text?: string }>)
+      ?.filter((p) => p.type === 'text')
+      .map((p) => p.text ?? '')
+      .join('') ?? ''
+    const queryEmbedding = await generateNoteEmbedding(textContent)
     const results = searchEmbeddings(sqlite, queryEmbedding, 5)
 
     if (results.length > 0) {
@@ -40,8 +44,8 @@ export async function POST(req: Request) {
   const result = streamText({
     model: chatModel,
     system: systemMessage,
-    messages,
+    messages: convertToModelMessages(messages),
   })
 
-  return result.toDataStreamResponse()
+  return result.toUIMessageStreamResponse()
 }

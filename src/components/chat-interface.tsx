@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 
 function TypingIndicator() {
   return (
@@ -21,9 +22,10 @@ function TypingIndicator() {
 }
 
 export function ChatInterface() {
-  const { messages, input, handleInputChange, handleSubmit, status } =
-    useChat({ api: '/api/chat' })
+  const { messages, sendMessage, status } =
+    useChat({ transport: new DefaultChatTransport({ api: '/api/chat' }) })
 
+  const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -33,6 +35,14 @@ export function ChatInterface() {
   }, [messages, status])
 
   const isStreaming = status === 'streaming'
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim()) return
+    const text = input
+    setInput('')
+    await sendMessage({ text })
+  }
 
   return (
     <div className="flex h-[calc(100vh-10rem)] flex-col">
@@ -74,19 +84,22 @@ export function ChatInterface() {
               <p className={`whitespace-pre-wrap text-sm ${
                 message.role === 'user' ? 'text-white' : 'text-foreground'
               }`}>
-                {message.content}
+                {message.parts
+                  .filter((p) => p.type === 'text')
+                  .map((p) => (p as { type: 'text'; text: string }).text)
+                  .join('')}
               </p>
             </div>
           </div>
         ))}
-        {isStreaming && messages[messages.length - 1]?.role === 'user' && (
+        {(status === 'submitted' || isStreaming) && messages[messages.length - 1]?.role === 'user' && (
           <TypingIndicator />
         )}
       </div>
       <form onSubmit={handleSubmit} className="flex gap-2 border-t border-border pt-4">
         <input
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about your notes..."
           className="flex-1 rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />

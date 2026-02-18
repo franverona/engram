@@ -16,9 +16,9 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 ## Architecture
 
 - **Frontend**: Next.js App Router with React Server Components. Client components use tRPC + React Query for data fetching.
-- **API**: tRPC handles CRUD and search. A separate `/api/chat` route uses the Vercel AI SDK for streaming RAG responses.
+- **API**: tRPC handles CRUD and search. A separate `/api/chat` route uses the Vercel AI SDK v5 for streaming RAG responses.
 - **Database**: SQLite via better-sqlite3 + Drizzle ORM. The `notes` table is managed by Drizzle. The `note_embeddings` table is a sqlite-vec `vec0` virtual table managed with raw SQL (Drizzle doesn't support virtual tables).
-- **AI**: Ollama provides both the chat model (llama3.1:8b) and embedding model (nomic-embed-text). The embedding dimension is 768.
+- **AI**: Ollama provides both the chat model (llama3.1:8b) and embedding model (nomic-embed-text). The embedding dimension is 768. The Ollama provider uses `@ai-sdk/openai-compatible` pointed at Ollama's OpenAI-compatible API (`/v1`).
 
 ## Key Conventions
 
@@ -29,6 +29,8 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `sqliteVec.load()` is called on the raw better-sqlite3 `Database` instance, not the Drizzle wrapper.
 - When passing `Float32Array` to sqlite-vec, use `Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength)` to handle views correctly.
 - tRPC uses `superjson` as its transformer and `zod` for input validation.
+- AI SDK v5 uses `UIMessage` (with a `parts` array) instead of a flat `content` string. Use `convertToModelMessages(messages)` in route handlers to convert to model-compatible format. Stream responses with `result.toUIMessageStreamResponse()`.
+- The `useChat` hook (`@ai-sdk/react` v2) requires a `transport` option (`new DefaultChatTransport({ api: '...' })`). It no longer exposes `input`/`handleInputChange`/`handleSubmit` — manage input state manually and call `sendMessage({ text })`.
 - Commits follow Conventional Commits. Husky + lint-staged + commitlint enforce linting and commit message format on pre-commit/commit-msg hooks.
 
 ## File Layout

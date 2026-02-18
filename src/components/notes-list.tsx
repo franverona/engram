@@ -5,6 +5,24 @@ import { useState } from 'react'
 import { useToast } from '@/components/toast'
 import { trpc } from '@/trpc/react'
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^```[\s\S]*?^```/gm, '')        // fenced code blocks (multi-line)
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images → alt text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')  // links → label
+    .replace(/^#{1,6}\s+/gm, '')              // headings
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')       // bold
+    .replace(/([*_])(.*?)\1/g, '$2')          // italic
+    .replace(/~~(.*?)~~/g, '$1')              // strikethrough
+    .replace(/`[^`]*`/g, '')                  // inline code
+    .replace(/^>\s+/gm, '')                   // blockquotes
+    .replace(/^[-*+]\s+/gm, '')               // unordered list markers
+    .replace(/^\d+\.\s+/gm, '')               // ordered list markers
+    .replace(/^-{3,}$/gm, '')                 // horizontal rules
+    .replace(/\n{2,}/g, ' ')                  // collapse blank lines
+    .trim()
+}
+
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr)
   const now = new Date()
@@ -150,9 +168,11 @@ export function NotesList() {
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold leading-snug">{note.title}</h3>
-                <p className="mt-1.5 line-clamp-3 whitespace-pre-wrap text-sm text-text-muted">
-                  {note.body}
+                <Link href={`/notes/${note.id}`} className="font-semibold leading-snug hover:text-primary">
+                  {note.title}
+                </Link>
+                <p className="mt-1.5 line-clamp-3 text-sm text-text-muted">
+                  {stripMarkdown(note.body)}
                 </p>
                 <p className="mt-2.5 text-xs text-text-faint">{timeAgo(note.createdAt)}</p>
               </div>

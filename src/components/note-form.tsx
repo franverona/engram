@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { MarkdownBody } from '@/components/markdown-body'
 import { useToast } from '@/components/toast'
 import { trpc } from '@/trpc/react'
 
@@ -17,6 +18,7 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
   const { showToast } = useToast()
   const [title, setTitle] = useState(initialTitle || '')
   const [body, setBody] = useState(initialBody || '')
+  const [tab, setTab] = useState<'edit' | 'preview'>('edit')
 
   const updateNote = trpc.notes.update.useMutation({
     onMutate: async (input) => {
@@ -83,20 +85,44 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
       </div>
       <div>
         <div className="flex items-center justify-between">
-          <label htmlFor="body" className="block text-sm font-medium">
-            Body
-          </label>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setTab('edit')}
+              className={`rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${tab === 'edit' ? 'bg-surface-secondary text-foreground' : 'text-text-muted hover:text-foreground'}`}
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('preview')}
+              className={`rounded-md px-2.5 py-1 text-sm font-medium transition-colors ${tab === 'preview' ? 'bg-surface-secondary text-foreground' : 'text-text-muted hover:text-foreground'}`}
+            >
+              Preview
+            </button>
+          </div>
           <span className="text-xs text-text-faint">{body.length} characters</span>
         </div>
-        <textarea
-          id="body"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          required
-          rows={10}
-          placeholder="Write your note..."
-          className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-        />
+        {tab === 'edit' ? (
+          <textarea
+            id="body"
+            aria-label="Body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+            rows={10}
+            placeholder="Write your note..."
+            className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        ) : (
+          <div className="mt-1.5 min-h-[14.5rem] w-full rounded-lg border border-border bg-surface px-3.5 py-2.5">
+            {body.trim() ? (
+              <MarkdownBody content={body} />
+            ) : (
+              <p className="text-text-faint">Nothing to preview.</p>
+            )}
+          </div>
+        )}
       </div>
       <button
         type="submit"

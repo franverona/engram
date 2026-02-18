@@ -1,6 +1,6 @@
+import Link from 'next/link'
 import { NoteForm } from '@/components/note-form'
 import { serverTrpc } from '@/trpc/server'
-import Link from 'next/link'
 
 export default async function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
   const {id} = await params

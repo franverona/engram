@@ -48,6 +48,10 @@ export function getEmbeddingsByIds(
   db: Database.Database,
   noteIds: number[],
 ): { note_id: number; embedding: Buffer }[] {
+  if (noteIds.length === 0) {
+    return []
+  }
+
   const placeholders = noteIds.map(() => '?').join(', ')
   return db
     .prepare(`SELECT note_id, embedding FROM note_embeddings WHERE note_id IN (${placeholders})`)

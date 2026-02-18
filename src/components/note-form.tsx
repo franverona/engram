@@ -1,9 +1,9 @@
 'use client'
 
-import { trpc } from '@/trpc/react'
-import { useToast } from '@/components/toast'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useToast } from '@/components/toast'
+import { trpc } from '@/trpc/react'
 
 type NoteFormProps = {
   initialBody?: string

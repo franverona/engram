@@ -1,10 +1,10 @@
-import { z } from 'zod'
 import { inArray } from 'drizzle-orm'
-import { baseProcedure, createTRPCRouter } from '../init'
+import { z } from 'zod'
+import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { db, sqlite } from '@/lib/db'
 import { notes } from '@/lib/db/schema'
 import { searchEmbeddings } from '@/lib/db/vec'
-import { generateNoteEmbedding } from '@/lib/ai/embeddings'
+import { baseProcedure, createTRPCRouter } from '../init'
 
 export const searchRouter = createTRPCRouter({
   semantic: baseProcedure

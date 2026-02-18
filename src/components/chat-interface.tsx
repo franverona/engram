@@ -68,13 +68,13 @@ export function ChatInterface() {
             className={clsx({
               'flex items-start gap-3': true,
               'ml-8 flex-row-reverse': message.role === 'user',
-              'mr-8':message.role !== 'user'
+              'mr-8': message.role !== 'user'
             })}
           >
             <div
               className={clsx({
                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold': true,
-                'bg-primary text-white':message.role === 'user',
+                'bg-primary text-white': message.role === 'user',
                 'bg-surface-secondary text-text-muted': message.role !== 'user'
               })}
             >
@@ -91,7 +91,7 @@ export function ChatInterface() {
                 className={clsx({
                   'whitespace-pre-wrap text-sm': true,
                   'text-white': message.role === 'user',
-                  'text-foreground':message.role !== 'user'
+                  'text-foreground': message.role !== 'user'
                 })}
               >
                 {message.parts

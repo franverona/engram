@@ -1,11 +1,11 @@
+import { convertToModelMessages, streamText } from 'ai'
+import { inArray } from 'drizzle-orm'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { mmr } from '@/lib/ai/mmr'
 import { chatModel } from '@/lib/ai/ollama'
 import { db, sqlite } from '@/lib/db'
 import { notes } from '@/lib/db/schema'
 import { getEmbeddingsByIds, searchEmbeddings } from '@/lib/db/vec'
-import { convertToModelMessages, streamText } from 'ai'
-import { inArray } from 'drizzle-orm'
 
 export async function POST(req: Request) {
   const { messages } = await req.json()

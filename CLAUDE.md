@@ -10,6 +10,8 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `npm run build` — Production build
 - `npm start` — Run local environment via `zx ./local-env.mjs`
 - `npm run lint` — Run ESLint
+- `npm test` — Run unit tests (Vitest)
+- `npm run test:watch` — Run tests in watch mode
 - `act pull_request` — Simulate the CI workflow locally (requires Docker + [act](https://github.com/nektos/act))
 - `npx drizzle-kit push` — Push schema changes to SQLite database
 - `npx drizzle-kit studio` — Open Drizzle Studio to inspect the database
@@ -29,6 +31,7 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `better-sqlite3` and `sqlite-vec` must stay in `serverExternalPackages` in `next.config.ts`.
 - `sqliteVec.load()` is called on the raw better-sqlite3 `Database` instance, not the Drizzle wrapper.
 - When passing `Float32Array` to sqlite-vec, use `Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength)` to handle views correctly.
+- `INSERT OR REPLACE` raises a `UNIQUE constraint` error on `vec0` virtual tables. Use a delete-then-insert wrapped in a transaction instead.
 - tRPC uses `superjson` as its transformer and `zod` for input validation.
 - AI SDK v5 uses `UIMessage` (with a `parts` array) instead of a flat `content` string. Use `convertToModelMessages(messages)` in route handlers to convert to model-compatible format. Stream responses with `result.toUIMessageStreamResponse()`.
 - The `useChat` hook (`@ai-sdk/react` v2) requires a `transport` option (`new DefaultChatTransport({ api: '...' })`). It no longer exposes `input`/`handleInputChange`/`handleSubmit` — manage input state manually and call `sendMessage({ text })`.

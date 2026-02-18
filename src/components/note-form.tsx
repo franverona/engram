@@ -106,6 +106,7 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
         {tab === 'edit' ? (
           <textarea
             id="body"
+            aria-label="Body"
             value={body}
             onChange={(e) => setBody(e.target.value)}
             required

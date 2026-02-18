@@ -42,9 +42,31 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
   })
 
   const createNote = trpc.notes.create.useMutation({
-    onSuccess: async () => {
-      await utils.notes.list.invalidate()
+    onMutate: async (input) => {
+      await utils.notes.list.cancel()
+      const previous = utils.notes.list.getData()
+      const tempId = -Date.now()
+      const tempDate = new Date().toISOString()
+      utils.notes.list.setData(undefined, (old) => [
+        ...(old ?? []),
+        {
+          id: tempId,
+          ...input,
+          createdAt: tempDate,
+          updatedAt: tempDate,
+        }
+      ])
+      return { previous }
+    },
+    onError: (_err, _input, ctx) => {
+      utils.notes.list.setData(undefined, ctx?.previous)
+    },
+    onSuccess: () => {
+      showToast('Note created successfully')
       router.push('/')
+    },
+    onSettled: () => {
+      utils.notes.list.invalidate()
     },
   })
 

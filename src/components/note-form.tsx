@@ -17,8 +17,19 @@ export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
   const [body, setBody] = useState(initialBody || '')
 
   const updateNote = trpc.notes.update.useMutation({
-    onSuccess: async () => {
-      await utils.notes.list.invalidate()
+    onMutate: async (input) => {
+      await utils.notes.list.cancel()
+      const previous = utils.notes.list.getData()
+      utils.notes.list.setData(undefined, (old) =>
+        old?.map((n) => (n.id === input.id ? { ...n, ...input } : n))
+      )
+      return { previous }
+    },
+    onError: (_err, _input, ctx) => {
+      utils.notes.list.setData(undefined, ctx?.previous)
+    },
+    onSettled: () => {
+      utils.notes.list.invalidate()
       router.push('/')
     },
   })

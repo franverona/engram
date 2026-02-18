@@ -46,6 +46,12 @@ See `.env.example` for all available options. Defaults work out of the box if Ol
 | `EMBEDDING_DIMENSION` | `768` | Vector dimension (must match embedding model) |
 | `DATABASE_PATH` | `./data/engram.db` | SQLite database file path |
 
+## Running Tests
+
+```bash
+npm test
+```
+
 ## Running CI Locally
 
 Install [act](https://github.com/nektos/act) and Docker, then:

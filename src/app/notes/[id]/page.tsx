@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { MarkdownBody } from '@/components/markdown-body'
 import { serverTrpc } from '@/trpc/server'
 
@@ -7,7 +8,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
   const note = await serverTrpc.notes.getById({ id: Number(id) })
 
   if (!note) {
-    return <p>Note not found.</p>
+    notFound()
   }
 
   return (

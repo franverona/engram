@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { NoteForm } from '@/components/note-form'
 import { serverTrpc } from '@/trpc/server'
 
@@ -7,7 +8,7 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
   const note = await serverTrpc.notes.getById({ id: Number(id) })
 
   if (!note) {
-    return <p>Note not found.</p>
+    notFound()
   }
 
   return (

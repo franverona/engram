@@ -1,32 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
 import { trpc } from '@/trpc/react'
-
-function Toast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000)
-    return () => clearTimeout(timer)
-  }, [onClose])
-
-  return (
-    <div className="fixed bottom-6 right-6 z-50 animate-[slideUp_0.2s_ease-out] rounded-lg border border-border bg-surface px-4 py-3 shadow-lg">
-      <div className="flex items-center gap-3">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <p className="text-sm font-medium">{message}</p>
-        <button onClick={onClose} className="ml-2 text-text-faint hover:text-foreground">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  )
-}
+import { useToast } from '@/components/toast'
+import Link from 'next/link'
+import { useState } from 'react'
 
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr)
@@ -57,6 +34,23 @@ function SkeletonCard() {
         </div>
       </div>
     </div>
+  )
+}
+
+function EditButton({ href }: { href: string }) {
+  return (
+    <Link
+      aria-label="Edit note"
+      href={href}
+      className="rounded-md p-1.5 text-text-faint hover:bg-lime-50 hover:text-lime-600 dark:hover:bg-lime-950 dark:hover:text-lime-400"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0
+  .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+    </Link>
   )
 }
 
@@ -102,13 +96,12 @@ function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void; isPendi
 export function NotesList() {
   const { data: notesList, isLoading } = trpc.notes.list.useQuery()
   const utils = trpc.useUtils()
-  const [toast, setToast] = useState<string | null>(null)
-  const dismissToast = useCallback(() => setToast(null), [])
+  const { showToast } = useToast()
 
   const deleteNote = trpc.notes.delete.useMutation({
     onSuccess: () => {
       utils.notes.list.invalidate()
-      setToast('Note deleted successfully')
+      showToast('Note deleted successfully')
     },
   })
 
@@ -163,7 +156,8 @@ export function NotesList() {
                 </p>
                 <p className="mt-2.5 text-xs text-text-faint">{timeAgo(note.createdAt)}</p>
               </div>
-              <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                <EditButton href={`/notes/${note.id}/edit`} />
                 <DeleteButton
                   onConfirm={() => deleteNote.mutate({ id: note.id })}
                   isPending={deleteNote.isPending}
@@ -173,7 +167,6 @@ export function NotesList() {
           </li>
         ))}
       </ul>
-      {toast && <Toast message={toast} onClose={dismissToast} />}
     </>
   )
 }

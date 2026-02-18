@@ -1,14 +1,43 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { trpc } from '@/trpc/react'
+import { useToast } from '@/components/toast'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-export function NoteForm() {
+type NoteFormProps = {
+  initialBody?: string
+  initialTitle?: string
+  initialId?: number
+}
+
+export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
   const router = useRouter()
   const utils = trpc.useUtils()
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
+  const { showToast } = useToast()
+  const [title, setTitle] = useState(initialTitle || '')
+  const [body, setBody] = useState(initialBody || '')
+
+  const updateNote = trpc.notes.update.useMutation({
+    onMutate: async (input) => {
+      await utils.notes.list.cancel()
+      const previous = utils.notes.list.getData()
+      utils.notes.list.setData(undefined, (old) =>
+        old?.map((n) => (n.id === input.id ? { ...n, ...input } : n))
+      )
+      return { previous }
+    },
+    onError: (_err, _input, ctx) => {
+      utils.notes.list.setData(undefined, ctx?.previous)
+    },
+    onSuccess: () => {
+      showToast('Note updated successfully')
+      router.push('/')
+    },
+    onSettled: () => {
+      utils.notes.list.invalidate()
+    },
+  })
 
   const createNote = trpc.notes.create.useMutation({
     onSuccess: async () => {
@@ -19,8 +48,22 @@ export function NoteForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createNote.mutate({ title, body })
+    if (initialId) {
+      updateNote.mutate({
+        id: initialId,
+        title,
+        body
+      })
+    } else {
+      createNote.mutate({
+        title,
+        body
+      })
+    }
   }
+
+  const isPending = createNote.isPending || updateNote.isPending
+  const error = createNote.error || updateNote.error
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -57,10 +100,10 @@ export function NoteForm() {
       </div>
       <button
         type="submit"
-        disabled={createNote.isPending || !title.trim() || !body.trim()}
+        disabled={isPending || !title.trim() || !body.trim()}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
       >
-        {createNote.isPending ? (
+        {isPending ? (
           <>
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
@@ -75,13 +118,13 @@ export function NoteForm() {
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />
             </svg>
-            Save Note
+            {initialId ? 'Save changes' : 'Save Note'}
           </>
         )}
       </button>
-      {createNote.error && (
+      {error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-          {createNote.error.message}
+          {error.message}
         </p>
       )}
     </form>

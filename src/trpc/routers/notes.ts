@@ -34,6 +34,19 @@ export const notesRouter = createTRPCRouter({
       return note
     }),
 
+  update: baseProcedure
+    .input(z.object({ id: z.number(), title: z.string().min(1), body: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const [updated] = await db
+        .update(notes)
+        .set({title: input.title, body: input.body})
+        .where(eq(notes.id, input.id))
+        .returning()
+        
+      await generateNoteEmbedding(`${updated.title}\n${updated.body}`)
+      return updated
+    }),
+
   delete: baseProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {

@@ -1,12 +1,12 @@
 'use client'
 
 type SearchResult = {
-  id: number;
-  title: string;
-  body: string;
-  createdAt: string;
-  updatedAt: string;
-  distance: number;
+  id: number
+  title: string
+  body: string
+  createdAt: string
+  updatedAt: string
+  distance: number
 }
 
 function similarityPercentage(distance: number): number {

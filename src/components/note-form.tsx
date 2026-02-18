@@ -1,9 +1,9 @@
 'use client'
 
-import { trpc } from '@/trpc/react'
-import { useToast } from '@/components/toast'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useToast } from '@/components/toast'
+import { trpc } from '@/trpc/react'
 
 type NoteFormProps = {
   initialBody?: string
@@ -11,7 +11,7 @@ type NoteFormProps = {
   initialId?: number
 }
 
-export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
+export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps) {
   const router = useRouter()
   const utils = trpc.useUtils()
   const { showToast } = useToast()

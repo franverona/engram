@@ -1,10 +1,10 @@
-import { z } from 'zod'
 import { eq } from 'drizzle-orm'
-import { baseProcedure, createTRPCRouter } from '../init'
+import { z } from 'zod'
+import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { db, sqlite } from '@/lib/db'
 import { notes } from '@/lib/db/schema'
 import { upsertEmbedding, deleteEmbedding } from '@/lib/db/vec'
-import { generateNoteEmbedding } from '@/lib/ai/embeddings'
+import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
   list: baseProcedure.query(async () => {
@@ -39,7 +39,7 @@ export const notesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const [updated] = await db
         .update(notes)
-        .set({title: input.title, body: input.body})
+        .set({ title: input.title, body: input.body })
         .where(eq(notes.id, input.id))
         .returning()
         

@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import clsx from 'clsx'
+import { useEffect, useRef, useState } from 'react'
 
 function TypingIndicator() {
   return (
@@ -22,8 +23,11 @@ function TypingIndicator() {
 }
 
 export function ChatInterface() {
-  const { messages, sendMessage, status } =
-    useChat({ transport: new DefaultChatTransport({ api: '/api/chat' }) })
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat'
+    })
+  })
 
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -61,32 +65,34 @@ export function ChatInterface() {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex items-start gap-3 ${
-              message.role === 'user' ? 'ml-8 flex-row-reverse' : 'mr-8'
-            }`}
+            className={clsx('flex items-start gap-3', {
+              'ml-8 flex-row-reverse': message.role === 'user',
+              'mr-8': message.role !== 'user'
+            })}
           >
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                message.role === 'user'
-                  ? 'bg-primary text-white'
-                  : 'bg-surface-secondary text-text-muted'
-              }`}
+              className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold', {
+                'bg-primary text-white': message.role === 'user',
+                'bg-surface-secondary text-text-muted': message.role !== 'user'
+              })}
             >
               {message.role === 'user' ? 'You' : 'AI'}
             </div>
             <div
-              className={`rounded-2xl px-4 py-3 shadow-sm ${
-                message.role === 'user'
-                  ? 'rounded-tr-sm bg-primary text-white'
-                  : 'rounded-tl-sm bg-surface-secondary'
-              }`}
+              className={clsx('rounded-2xl px-4 py-3 shadow-sm', {
+                'rounded-tr-sm bg-primary text-white': message.role === 'user',
+                'rounded-tl-sm bg-surface-secondary': message.role !== 'user'
+              })}
             >
-              <p className={`whitespace-pre-wrap text-sm ${
-                message.role === 'user' ? 'text-white' : 'text-foreground'
-              }`}>
+              <p
+                className={clsx('whitespace-pre-wrap text-sm', {
+                  'text-white': message.role === 'user',
+                  'text-foreground': message.role !== 'user'
+                })}
+              >
                 {message.parts
                   .filter((p) => p.type === 'text')
-                  .map((p) => (p as { type: 'text'; text: string }).text)
+                  .map((p) => (p as { type: 'text', text: string }).text)
                   .join('')}
               </p>
             </div>

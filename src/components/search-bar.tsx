@@ -6,8 +6,8 @@ export function SearchBar({
   onSearch,
   isLoading,
 }: {
-  onSearch: (query: string) => void;
-  isLoading: boolean;
+  onSearch: (query: string) => void
+  isLoading: boolean
 }) {
   const [query, setQuery] = useState('')
 

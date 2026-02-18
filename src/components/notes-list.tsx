@@ -1,9 +1,9 @@
 'use client'
 
-import { trpc } from '@/trpc/react'
-import { useToast } from '@/components/toast'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useToast } from '@/components/toast'
+import { trpc } from '@/trpc/react'
 
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr)
@@ -54,7 +54,7 @@ function EditButton({ href }: { href: string }) {
   )
 }
 
-function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void; isPending: boolean }) {
+function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void, isPending: boolean }) {
   const [confirming, setConfirming] = useState(false)
 
   if (confirming) {

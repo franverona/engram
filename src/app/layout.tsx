@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Link from 'next/link'
-import { TRPCProvider } from '@/trpc/react'
-import { ToastProvider } from '@/components/toast'
 import { MobileNav } from '@/components/mobile-nav'
 import { NavLink } from '@/components/nav-link'
+import { ToastProvider } from '@/components/toast'
+import { TRPCProvider } from '@/trpc/react'
 import './globals.css'
 
 const geistSans = Geist({
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">

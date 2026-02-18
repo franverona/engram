@@ -1,7 +1,7 @@
 import 'server-only'
 import { createHydrationHelpers } from '@trpc/react-query/rsc'
-import { cache } from 'react'
 import { initTRPC } from '@trpc/server'
+import { cache } from 'react'
 import superjson from 'superjson'
 import { makeQueryClient } from './query-client'
 import { appRouter } from './routers/_app'

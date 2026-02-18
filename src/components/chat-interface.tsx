@@ -4,6 +4,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
+import { MarkdownBody } from '@/components/markdown-body'
 
 function TypingIndicator() {
   return (
@@ -84,17 +85,23 @@ export function ChatInterface() {
                 'rounded-tl-sm bg-surface-secondary': message.role !== 'user'
               })}
             >
-              <p
-                className={clsx('whitespace-pre-wrap text-sm', {
-                  'text-white': message.role === 'user',
-                  'text-foreground': message.role !== 'user'
-                })}
-              >
-                {message.parts
-                  .filter((p) => p.type === 'text')
-                  .map((p) => (p as { type: 'text', text: string }).text)
-                  .join('')}
-              </p>
+              {message.role === 'user' ? (
+                <p className="whitespace-pre-wrap text-sm text-white">
+                  {message.parts
+                    .filter((p) => p.type === 'text')
+                    .map((p) => (p as { type: 'text', text: string }).text)
+                    .join('')}
+                </p>
+              ) : (
+                <div className="prose-chat text-sm">
+                  <MarkdownBody
+                    content={message.parts
+                      .filter((p) => p.type === 'text')
+                      .map((p) => (p as { type: 'text', text: string }).text)
+                      .join('')}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}

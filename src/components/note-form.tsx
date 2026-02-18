@@ -11,7 +11,7 @@ type NoteFormProps = {
   initialId?: number
 }
 
-export function NoteForm({initialBody,initialId,initialTitle}:NoteFormProps) {
+export function NoteForm({ initialBody, initialId, initialTitle }:NoteFormProps) {
   const router = useRouter()
   const utils = trpc.useUtils()
   const { showToast } = useToast()

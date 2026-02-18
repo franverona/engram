@@ -3,7 +3,7 @@ import { NoteForm } from '@/components/note-form'
 import { serverTrpc } from '@/trpc/server'
 
 export default async function EditNotePage({ params }: { params: Promise<{ id: string }> }) {
-  const {id} = await params
+  const { id } = await params
   const note = await serverTrpc.notes.getById({ id: Number(id) })
 
   if (!note) {

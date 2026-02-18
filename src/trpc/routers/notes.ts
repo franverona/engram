@@ -39,7 +39,7 @@ export const notesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const [updated] = await db
         .update(notes)
-        .set({title: input.title, body: input.body})
+        .set({ title: input.title, body: input.body })
         .where(eq(notes.id, input.id))
         .returning()
         

@@ -25,6 +25,12 @@ const eslintConfig = defineConfig([
       '@stylistic/indent': ['error', 2],
       '@stylistic/eol-last': ['error', 'always'],
       '@stylistic/key-spacing': ['error', { beforeColon: false, afterColon: true }],
+      '@stylistic/comma-spacing': ['error', { before: false, after: true }],
+      '@stylistic/object-curly-spacing': ['error', 'always'],
+      '@stylistic/arrow-spacing': ['error', { before: true, after: true }],
+      '@stylistic/keyword-spacing': ['error', { before: true, after: true }],
+      '@stylistic/space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
+      'react/self-closing-comp': ['error', { component: true, html: true }],
       'no-restricted-syntax': [
         'error',
         {

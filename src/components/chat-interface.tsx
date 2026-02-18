@@ -65,15 +65,13 @@ export function ChatInterface() {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={clsx({
-              'flex items-start gap-3': true,
+            className={clsx('flex items-start gap-3', {
               'ml-8 flex-row-reverse': message.role === 'user',
               'mr-8': message.role !== 'user'
             })}
           >
             <div
-              className={clsx({
-                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold': true,
+              className={clsx('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold', {
                 'bg-primary text-white': message.role === 'user',
                 'bg-surface-secondary text-text-muted': message.role !== 'user'
               })}
@@ -81,15 +79,13 @@ export function ChatInterface() {
               {message.role === 'user' ? 'You' : 'AI'}
             </div>
             <div
-              className={clsx({
-                'rounded-2xl px-4 py-3 shadow-sm': true,
+              className={clsx('rounded-2xl px-4 py-3 shadow-sm', {
                 'rounded-tr-sm bg-primary text-white': message.role === 'user',
                 'rounded-tl-sm bg-surface-secondary': message.role !== 'user'
               })}
             >
               <p
-                className={clsx({
-                  'whitespace-pre-wrap text-sm': true,
+                className={clsx('whitespace-pre-wrap text-sm', {
                   'text-white': message.role === 'user',
                   'text-foreground': message.role !== 'user'
                 })}

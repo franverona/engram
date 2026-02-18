@@ -24,34 +24,36 @@ export async function POST(req: Request) {
     const queryEmbedding = await generateNoteEmbedding(textContent)
 
     const candidates = searchEmbeddings(sqlite, queryEmbedding, 20)
-    const embeddings = getEmbeddingsByIds(sqlite, candidates.map((c) => c.note_id))
+    if (candidates.length > 0) {
+      const embeddings = getEmbeddingsByIds(sqlite, candidates.map((c) => c.note_id))
 
-    const embeddingMap = new Map(
-      embeddings.map((e) => [
-        e.note_id,
-        new Float32Array(
-          e.embedding.buffer,
-          e.embedding.byteOffset,
-          e.embedding.byteLength / Float32Array.BYTES_PER_ELEMENT
-        )
-      ])
-    )
+      const embeddingMap = new Map(
+        embeddings.map((e) => [
+          e.note_id,
+          new Float32Array(
+            e.embedding.buffer,
+            e.embedding.byteOffset,
+            e.embedding.byteLength / Float32Array.BYTES_PER_ELEMENT
+          )
+        ])
+      )
 
-    const candidatesWithEmbeddings = candidates
-      .filter((c) => embeddingMap.has(c.note_id))
-      .map((c) => ({ note_id: c.note_id, embedding: embeddingMap.get(c.note_id)! }))
+      const candidatesWithEmbeddings = candidates
+        .filter((c) => embeddingMap.has(c.note_id))
+        .map((c) => ({ note_id: c.note_id, embedding: embeddingMap.get(c.note_id)! }))
 
-    const noteIds = mmr(queryEmbedding, candidatesWithEmbeddings, 5)
+      const noteIds = mmr(queryEmbedding, candidatesWithEmbeddings, 5)
 
-    if (noteIds.length > 0) {
-      const matchedNotes = await db
-        .select()
-        .from(notes)
-        .where(inArray(notes.id, noteIds))
+      if (noteIds.length > 0) {
+        const matchedNotes = await db
+          .select()
+          .from(notes)
+          .where(inArray(notes.id, noteIds))
 
-      context = matchedNotes
-        .map((n) => `# ${n.title}\n${n.body}`)
-        .join('\n\n---\n\n')
+        context = matchedNotes
+          .map((n) => `# ${n.title}\n${n.body}`)
+          .join('\n\n---\n\n')
+      }
     }
   }
 

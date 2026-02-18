@@ -117,9 +117,22 @@ export function NotesList() {
   const { showToast } = useToast()
 
   const deleteNote = trpc.notes.delete.useMutation({
+    onMutate: async (input) => {
+      await utils.notes.list.cancel()
+      const previous = utils.notes.list.getData()
+      utils.notes.list.setData(undefined, (old) =>
+        old?.filter((n) => n.id !== input.id)
+      )
+      return { previous }
+    },
+    onError: (_err, _input, ctx) => {
+      utils.notes.list.setData(undefined, ctx?.previous)
+    },
     onSuccess: () => {
-      utils.notes.list.invalidate()
       showToast('Note deleted successfully')
+    },
+    onSettled: () => {
+      utils.notes.list.invalidate()
     },
   })
 

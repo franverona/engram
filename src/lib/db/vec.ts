@@ -43,3 +43,13 @@ export function searchEmbeddings(
 export function deleteEmbedding(db: Database.Database, noteId: number) {
   db.prepare('DELETE FROM note_embeddings WHERE note_id = ?').run(BigInt(noteId))
 }
+
+export function getEmbeddingsByIds(
+  db: Database.Database,
+  noteIds: number[],
+): { note_id: number; embedding: Buffer }[] {
+  const placeholders = noteIds.map(() => '?').join(', ')
+  return db
+    .prepare(`SELECT note_id, embedding FROM note_embeddings WHERE note_id IN (${placeholders})`)
+    .all(...noteIds.map((id) => BigInt(id))) as { note_id: number; embedding: Buffer }[]
+}

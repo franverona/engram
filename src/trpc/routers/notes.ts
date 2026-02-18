@@ -24,36 +24,34 @@ export const notesRouter = createTRPCRouter({
   create: baseProcedure
     .input(z.object({ title: z.string().min(1), body: z.string().min(1) }))
     .mutation(async ({ input }) => {
-      const [note] = await db.insert(notes).values(input).returning()
-
-      const embedding = await generateNoteEmbedding(
-        `${note.title}\n${note.body}`,
-      )
-      upsertEmbedding(sqlite, note.id, embedding)
-
+      const embedding = await generateNoteEmbedding(`${input.title}\n${input.body}`)
+      const [note] = sqlite.transaction(() => {
+        const [note] = db.insert(notes).values(input).returning().all()
+        upsertEmbedding(sqlite, note.id, embedding)
+        return [note]
+      })()
       return note
     }),
 
   update: baseProcedure
     .input(z.object({ id: z.number(), title: z.string().min(1), body: z.string().min(1) }))
     .mutation(async ({ input }) => {
-      const [updated] = await db
-        .update(notes)
-        .set({ title: input.title, body: input.body })
-        .where(eq(notes.id, input.id))
-        .returning()
-
-      const embedding = await generateNoteEmbedding(`${updated.title}\n${updated.body}`)
-      upsertEmbedding(sqlite, updated.id, embedding)
-
+      const embedding = await generateNoteEmbedding(`${input.title}\n${input.body}`)
+      const [updated] = sqlite.transaction(() => {
+        const [updated] = db.update(notes).set({ title: input.title, body: input.body }).where(eq(notes.id, input.id)).returning().all()
+        upsertEmbedding(sqlite, updated.id, embedding)
+        return [updated]
+      })()
       return updated
     }),
 
   delete: baseProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      deleteEmbedding(sqlite, input.id)
-      await db.delete(notes).where(eq(notes.id, input.id))
+      sqlite.transaction(() => {
+        deleteEmbedding(sqlite, input.id)
+        db.delete(notes).where(eq(notes.id, input.id)).run()
+      })()
       return { success: true }
     }),
 })

@@ -37,7 +37,10 @@ export function mmr(
       // On the first iteration there are no selected notes, so redundancy is 0.
       const redundancy = selected.length === 0
         ? 0
-        : Math.max(...selected.map((s) => cosineSimilarity(remaining[i].embedding, s.embedding)))
+        : selected.reduce((max, s) => {
+          const sim = cosineSimilarity(remaining[i].embedding, s.embedding)
+          return sim > max ? sim : max
+        }, -Infinity)
 
       const score = lambda * relevance - (1 - lambda) * redundancy
       if (score > bestScore) {

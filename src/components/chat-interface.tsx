@@ -1,6 +1,7 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
+import type { UIMessage } from 'ai'
 import { DefaultChatTransport } from 'ai'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
@@ -23,10 +24,17 @@ function TypingIndicator() {
   )
 }
 
-export function ChatInterface() {
+type ChatInterfaceProps = {
+  chatId: number
+  initialMessages: UIMessage[]
+}
+
+export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
   const { messages, sendMessage, status } = useChat({
+    messages: initialMessages,
     transport: new DefaultChatTransport({
-      api: '/api/chat'
+      api: '/api/chat',
+      body: { chatId }
     })
   })
 

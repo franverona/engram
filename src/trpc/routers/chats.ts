@@ -16,6 +16,17 @@ export const chatsRouter = createTRPCRouter({
       return chat
     }),
 
+  update: baseProcedure
+    .input(z.object({ id: z.number(), title: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const [updated] = db
+        .update(chats)
+        .set({ title: input.title })
+        .where(eq(chats.id, input.id))
+        .returning().all()
+      return updated
+    }),
+
   delete: baseProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {

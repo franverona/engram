@@ -34,6 +34,32 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Docker
+
+### Production (full stack)
+
+Runs the Next.js app and Ollama in containers. Models are pulled automatically on first run.
+
+```bash
+mkdir -p data
+docker compose up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+Data persists between runs — the SQLite database is bind-mounted to `./data/` and Ollama models are stored in a named volume. Use `docker compose down -v` only if you want to wipe model storage.
+
+### Dev (Ollama only)
+
+Runs only Ollama in Docker while the app runs natively. Gives full hot reload speed with Metal GPU acceleration on macOS.
+
+```bash
+docker compose -f docker-compose.dev.yml up
+npm run dev
+```
+
+> **Note:** On macOS, Ollama inside Docker runs on CPU only (no Metal GPU). Inference with `llama3.1:8b` will be slow. For daily development, prefer native Ollama or switch to a smaller model via `OLLAMA_CHAT_MODEL=llama3.2:3b` in `.env.local`.
+
 ## Environment Variables
 
 See `.env.example` for all available options. Defaults work out of the box if Ollama is running locally.
@@ -76,4 +102,6 @@ src/
     db/             # Drizzle schema, sqlite-vec helpers
   trpc/             # tRPC router, React provider, server helpers
 data/               # SQLite database (gitignored)
+scripts/
+  init-ollama.sh    # Pulls required Ollama models on first Docker run
 ```

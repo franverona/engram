@@ -62,10 +62,6 @@ async function startEnvironment() {
   await loadEnvFile('.env')
   await loadEnvFile('.env.local')
 
-  // Set Firestore emulator host
-  process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST = 'http://127.0.0.1:8080'
-  $.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST = 'http://127.0.0.1:8080'
-
   // Wait for WezTerm to be ready
   await sleep(2000)
 

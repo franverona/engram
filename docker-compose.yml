@@ -1,0 +1,46 @@
+volumes:
+  ollama_data:
+
+services:
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/scripts/init-ollama.sh"]
+    volumes:
+      - ./scripts:/scripts
+      - ollama_data:/root/.ollama
+    restart: "no"
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+
+  app:
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    build:
+      context: .
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      OLLAMA_BASE_URL: "http://ollama:11434/v1"
+      NEXT_TELEMETRY_DISABLED: 1

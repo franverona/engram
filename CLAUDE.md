@@ -15,6 +15,8 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `act pull_request` — Simulate the CI workflow locally (requires Docker + [act](https://github.com/nektos/act))
 - `npx drizzle-kit push` — Push schema changes to SQLite database
 - `npx drizzle-kit studio` — Open Drizzle Studio to inspect the database
+- `docker compose up --build` — Start full stack in Docker (app + Ollama)
+- `docker compose -f docker-compose.dev.yml up` — Start only Ollama in Docker (app runs natively)
 
 ## Architecture
 
@@ -37,6 +39,15 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - The `useChat` hook (`@ai-sdk/react` v2) requires a `transport` option (`new DefaultChatTransport({ api: '...' })`). It no longer exposes `input`/`handleInputChange`/`handleSubmit` — manage input state manually and call `sendMessage({ text })`.
 - Commits follow Conventional Commits. Husky + lint-staged + commitlint enforce linting and commit message format on pre-commit/commit-msg hooks.
 
+## Docker
+
+- `next.config.ts` has `output: 'standalone'` — required for the multi-stage Docker build to produce a lean runtime image.
+- `DATABASE_PATH=:memory:` is set in the Dockerfile builder stage so `npm run build` doesn't fail — Next.js spawns 9 parallel workers to collect page data, all of which open the same SQLite file and cause `SQLITE_BUSY` errors. In-memory databases are isolated per-worker.
+- The Next.js standalone dependency tracer doesn't pick up `sqlite-vec-linux-arm64` (dynamically loaded extension). It must be manually copied into the runner stage via `COPY --from=builder`.
+- Use `node:24-slim` (Debian/glibc), not `node:24-alpine` (musl) — pre-built binaries for `better-sqlite3` and `sqlite-vec` target glibc and won't load on Alpine.
+- `postcss.config.mjs` must NOT be excluded in `.dockerignore` — it's required at build time for Tailwind CSS to generate styles. Avoid `*.mjs` wildcards; list dev-only `.mjs` files explicitly instead.
+- On macOS, Ollama in Docker runs on CPU only (no Metal GPU). Inference is significantly slower than native. For development, prefer native Ollama or use a smaller model (`llama3.2:3b`).
+
 ## File Layout
 
 ```
@@ -48,4 +59,9 @@ src/
   lib/ai/                     # ollama.ts (provider config), embeddings.ts (embed helper)
   lib/db/                     # index.ts (connection), schema.ts (Drizzle schema), vec.ts (sqlite-vec raw SQL)
   trpc/                       # init.ts, routers/, query-client.ts, server.ts, react.tsx
+scripts/
+  init-ollama.sh              # Pulls llama3.1:8b and nomic-embed-text on first Docker run
+Dockerfile                    # Multi-stage build: deps → builder → runner
+docker-compose.yml            # Production: app + ollama services
+docker-compose.dev.yml        # Dev: ollama only (app runs natively)
 ```

@@ -112,13 +112,22 @@ function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void, isPendi
   )
 }
 
-function SummarizeButton({ onClick, isPending }: { onClick: () => void, isPending: boolean }) {
+function SummarizeButton({
+  exists,
+  onClick,
+  isPending
+}: {
+  exists: boolean
+  onClick: () => void
+  isPending: boolean
+}) {
   return (
     <button
       disabled={isPending}
       onClick={onClick}
       className="rounded-md p-1.5 text-text-faint hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:hover:bg-fuchsia-950 dark:hover:text-fuchsia-400"
-      aria-label="Summarize note"
+      aria-label={exists ? 'Regenerate note' : 'Summarize note'}
+      title={exists ? 'Regenerate note' : 'Summarize note'}
     >
       {isPending ? (
         <Spinner />
@@ -236,6 +245,7 @@ export function NotesList() {
                   </Link>
                   <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
                     <SummarizeButton
+                      exists={!!note.summary}
                       onClick={() => summarizeNote.mutate({ id: note.id })}
                       isPending={summarizingIds.has(note.id)}
                     />

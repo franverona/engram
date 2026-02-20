@@ -5,6 +5,7 @@ export const notes = sqliteTable('notes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   title: text('title').notNull(),
   body: text('body').notNull(),
+  summary: text('summary'),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),

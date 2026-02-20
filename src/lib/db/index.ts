@@ -2,6 +2,7 @@ import 'server-only'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as sqliteVec from 'sqlite-vec'
+import { initFtsTable } from './fts'
 import * as schema from './schema'
 import { initVecTable } from './vec'
 
@@ -11,6 +12,7 @@ sqlite.pragma('foreign_keys = ON')
 sqliteVec.load(sqlite)
 
 initVecTable(sqlite)
+initFtsTable(sqlite)
 
 export const db = drizzle(sqlite, { schema })
 export { sqlite }

@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { db, sqlite } from '@/lib/db'
+import { deleteFts, upsertFts } from '@/lib/db/fts'
 import { notes } from '@/lib/db/schema'
 import { upsertEmbedding, deleteEmbedding } from '@/lib/db/vec'
 import { baseProcedure, createTRPCRouter } from '../init'
@@ -28,6 +29,7 @@ export const notesRouter = createTRPCRouter({
       const [note] = sqlite.transaction(() => {
         const [note] = db.insert(notes).values(input).returning().all()
         upsertEmbedding(sqlite, note.id, embedding)
+        upsertFts(sqlite, note.id, input.title, input.body)
         return [note]
       })()
       return note
@@ -40,6 +42,7 @@ export const notesRouter = createTRPCRouter({
       const [updated] = sqlite.transaction(() => {
         const [updated] = db.update(notes).set({ title: input.title, body: input.body }).where(eq(notes.id, input.id)).returning().all()
         upsertEmbedding(sqlite, updated.id, embedding)
+        upsertFts(sqlite, updated.id, input.title, input.body)
         return [updated]
       })()
       return updated
@@ -50,6 +53,7 @@ export const notesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       sqlite.transaction(() => {
         deleteEmbedding(sqlite, input.id)
+        deleteFts(sqlite, input.id)
         db.delete(notes).where(eq(notes.id, input.id)).run()
       })()
       return { success: true }

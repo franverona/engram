@@ -1,6 +1,6 @@
 # Engram
 
-A local-first notes app with semantic search and RAG chat. Everything runs on your machine using [Ollama](https://ollama.com) for embeddings and LLM inference.
+A local-first notes app with hybrid search and RAG chat. Everything runs on your machine using [Ollama](https://ollama.com) for embeddings and LLM inference.
 
 ## Stack
 
@@ -8,6 +8,7 @@ A local-first notes app with semantic search and RAG chat. Everything runs on yo
 - **tRPC** for type-safe API layer
 - **Drizzle ORM** + **better-sqlite3** for persistence
 - **sqlite-vec** for vector similarity search
+- **SQLite FTS5** for lexical full-text search
 - **Vercel AI SDK** + **Ollama** for embeddings and chat
 - **Husky** + **lint-staged** + **commitlint** for Conventional Commits enforcement
 
@@ -28,9 +29,12 @@ ollama pull nomic-embed-text
 ```bash
 npm install
 cp .env.example .env.local   # optional — defaults work without it
-npx drizzle-kit push          # create/migrate the database
+npx drizzle-kit generate      # generate migration SQL
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql   # apply it
 npm run dev
 ```
+
+> **Note:** `npx drizzle-kit push` is broken — see [Schema Changes](#schema-changes) below. Use `drizzle-kit generate` + `sqlite3` instead. The virtual tables (`note_embeddings`, `note_fts`) are created automatically on server start.
 
 Open [http://localhost:3000](http://localhost:3000).
 
@@ -72,6 +76,24 @@ See `.env.example` for all available options. Defaults work out of the box if Ol
 | `EMBEDDING_DIMENSION` | `768` | Vector dimension (must match embedding model) |
 | `DATABASE_PATH` | `./data/engram.db` | SQLite database file path |
 
+## Schema Changes
+
+`drizzle-kit push` is broken — it introspects the database without loading sqlite-vec, hits the `note_embeddings` virtual table and crashes. Use `drizzle-kit generate` to produce a SQL migration file and apply it manually:
+
+```bash
+npx drizzle-kit generate
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
+```
+
+## Resetting the Database
+
+```bash
+rm -f ./data/engram.db ./data/engram.db-shm ./data/engram.db-wal
+npx drizzle-kit generate
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
+npm run dev   # virtual tables are recreated automatically on startup
+```
+
 ## Running Tests
 
 ```bash
@@ -95,11 +117,11 @@ src/
     api/trpc/       # tRPC handler
     chat/           # Chat page
     notes/new/      # Create note page
-    search/         # Semantic search page
+    search/         # Hybrid search page
   components/       # React components
   lib/
     ai/             # Ollama provider, embedding generation
-    db/             # Drizzle schema, sqlite-vec helpers
+    db/             # Drizzle schema, sqlite-vec helpers, FTS5 helpers
   trpc/             # tRPC router, React provider, server helpers
 data/               # SQLite database (gitignored)
 scripts/

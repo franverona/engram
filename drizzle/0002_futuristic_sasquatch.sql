@@ -1,0 +1,1 @@
+ALTER TABLE `notes` ADD `summarized_at` text;

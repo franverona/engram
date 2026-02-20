@@ -13,6 +13,7 @@ export const notes = sqliteTable('notes', {
     .notNull()
     .default(sql`(datetime('now'))`)
     .$onUpdate(() => new Date().toISOString()),
+  summarizedAt: text('summarized_at'),
 })
 
 export const chats = sqliteTable('chats', {

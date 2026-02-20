@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { NavLink } from './nav-link'
 
-export default function LayoutSidebar() {
+export default function LayoutNavBar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
       <div className="max-w-6xl flex gap-10 items-center m-auto px-4 py-2">

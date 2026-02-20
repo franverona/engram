@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { LayoutContent, LayoutSidebar } from '@/components/layout'
+import { LayoutContent, LayoutNavBar } from '@/components/layout'
 import { ToastProvider } from '@/components/toast'
 import { TRPCProvider } from '@/trpc/react'
 import './globals.css'
@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <TRPCProvider>
           <ToastProvider>
-            <LayoutSidebar />
+            <LayoutNavBar />
             <LayoutContent>{children}</LayoutContent>
           </ToastProvider>
         </TRPCProvider>

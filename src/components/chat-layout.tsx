@@ -82,7 +82,7 @@ export default function ChatLayout() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-45px)]">
+    <div className="flex h-[calc(100vh-53px)]">
       <div className="chat-scroll overflow-y-auto gap-2 w-3xs py-6 pr-2 border-r border-border">
         <button
           className="inline-flex items-center gap-2 w-full text-sm p-2 rounded-md text-white hover:bg-primary-hover cursor-pointer mb-5"

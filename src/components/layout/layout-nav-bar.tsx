@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import { MobileNav } from '../mobile-nav'
 import { NavLink } from './nav-link'
 
 export default function LayoutNavBar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="max-w-6xl flex gap-10 items-center m-auto px-4 py-2">
+      <div className="max-w-6xl flex gap-10 items-center justify-between m-auto px-4 py-2">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
           <svg
             width="24"
@@ -26,11 +27,12 @@ export default function LayoutNavBar() {
           </svg>
           Engram
         </Link>
-        <div className="flex gap-5">
+        <div className="hidden flex-1 sm:flex gap-5 py-2">
           <NavLink href="/">Notes</NavLink>
           <NavLink href="/search">Search</NavLink>
           <NavLink href="/chat">Chat</NavLink>
         </div>
+        <MobileNav />
       </div>
     </nav>
   )

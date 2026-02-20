@@ -13,8 +13,8 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - `npm test` — Run unit tests (Vitest)
 - `npm run test:watch` — Run tests in watch mode
 - `act pull_request` — Simulate the CI workflow locally (requires Docker + [act](https://github.com/nektos/act))
-- `npx drizzle-kit push` — Push schema changes to SQLite database
-- `npx drizzle-kit studio` — Open Drizzle Studio to inspect the database
+- `npx drizzle-kit push` — **Broken** — see note below
+- `npx drizzle-kit studio` — **Broken** — see note below
 - `docker compose up --build` — Start full stack in Docker (app + Ollama)
 - `docker compose -f docker-compose.dev.yml up` — Start only Ollama in Docker (app runs natively)
 
@@ -38,6 +38,16 @@ Engram is a local-first notes app with semantic search and RAG chat, built with 
 - AI SDK v5 uses `UIMessage` (with a `parts` array) instead of a flat `content` string. Use `convertToModelMessages(messages)` in route handlers to convert to model-compatible format. Stream responses with `result.toUIMessageStreamResponse()`.
 - The `useChat` hook (`@ai-sdk/react` v2) requires a `transport` option (`new DefaultChatTransport({ api: '...' })`). It no longer exposes `input`/`handleInputChange`/`handleSubmit` — manage input state manually and call `sendMessage({ text })`.
 - Commits follow Conventional Commits. Husky + lint-staged + commitlint enforce linting and commit message format on pre-commit/commit-msg hooks.
+
+## Schema Changes
+
+`drizzle-kit push` is broken for this project — it opens the database without loading sqlite-vec, hits the `note_embeddings` vec0 virtual table during introspection, and crashes. Apply schema changes with raw SQL instead:
+
+```bash
+sqlite3 ./data/engram.db "CREATE TABLE ..."
+```
+
+`drizzle-kit studio` has the same problem and is also broken. `drizzle-kit generate` (generates migration SQL files without connecting to the DB) still works. To inspect the database use the `sqlite3` CLI or a GUI tool like [TablePlus](https://tableplus.com) or [DB Browser for SQLite](https://sqlitebrowser.org).
 
 ## Docker
 

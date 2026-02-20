@@ -1,10 +1,12 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
+import type { UIMessage } from 'ai'
 import { DefaultChatTransport } from 'ai'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { MarkdownBody } from '@/components/markdown-body'
+import { trpc } from '@/trpc/react'
 
 function TypingIndicator() {
   return (
@@ -23,10 +25,18 @@ function TypingIndicator() {
   )
 }
 
-export function ChatInterface() {
+type ChatInterfaceProps = {
+  chatId: number
+  initialMessages: UIMessage[]
+}
+
+export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
+  const utils = trpc.useUtils()
   const { messages, sendMessage, status } = useChat({
+    messages: initialMessages,
     transport: new DefaultChatTransport({
-      api: '/api/chat'
+      api: '/api/chat',
+      body: { chatId }
     })
   })
 
@@ -41,17 +51,39 @@ export function ChatInterface() {
 
   const isStreaming = status === 'streaming'
 
+  const updateChat = trpc.chats.update.useMutation({
+    onMutate: async (input) => {
+      await utils.chats.list.cancel()
+      const previous = utils.chats.list.getData()
+      utils.chats.list.setData(undefined, (old) =>
+        old?.map((c) => (c.id === input.id ? { ...c, ...input } : c))
+      )
+      return { previous }
+    },
+    onError: (_err, _input, ctx) => {
+      utils.chats.list.setData(undefined, ctx?.previous)
+    },
+    onSettled: () => {
+      utils.chats.list.invalidate()
+    },
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
     const text = input
     setInput('')
+
+    if (messages.length === 0) {
+      updateChat.mutate({ id: chatId, title: text })
+    }
+
     await sendMessage({ text })
   }
 
   return (
     <div className="flex h-[calc(100vh-10rem)] flex-col">
-      <div ref={scrollRef} className="chat-scroll flex-1 space-y-4 overflow-y-auto pb-4">
+      <div ref={scrollRef} className="chat-scroll flex-1 space-y-4 overflow-y-auto pb-4 pl-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-text-faint">
@@ -109,7 +141,7 @@ export function ChatInterface() {
           <TypingIndicator />
         )}
       </div>
-      <form onSubmit={handleSubmit} className="flex gap-2 border-t border-border pt-4">
+      <form onSubmit={handleSubmit} className="flex gap-2 border-t border-border pt-4 pl-4">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

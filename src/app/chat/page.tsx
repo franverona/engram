@@ -1,9 +1,7 @@
-import { ChatInterface } from '@/components/chat-interface'
+import ChatLayout from '@/components/chat-layout'
 
-export default function ChatPage() {
+export default async function ChatPage() {
   return (
-    <div>
-      <ChatInterface />
-    </div>
+    <ChatLayout />
   )
 }

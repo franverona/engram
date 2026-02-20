@@ -1,26 +1,31 @@
+import type { UIMessage } from 'ai'
 import { convertToModelMessages, streamText } from 'ai'
 import { inArray } from 'drizzle-orm'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { mmr } from '@/lib/ai/mmr'
 import { chatModel } from '@/lib/ai/ollama'
 import { db, sqlite } from '@/lib/db'
-import { notes } from '@/lib/db/schema'
+import { chatMessages, notes } from '@/lib/db/schema'
 import { getEmbeddingsByIds, searchEmbeddings } from '@/lib/db/vec'
 
+type ApiRequest = {
+  chatId: number
+  messages: UIMessage[]
+}
+
 export async function POST(req: Request) {
-  const { messages } = await req.json()
+  const { chatId, messages } = await req.json() as ApiRequest
 
   const lastUserMessage = [...messages]
     .reverse()
-    .find((m: { role: string }) => m.role === 'user')
+    .find((m) => m.role === 'user')
 
   let context = ''
-
-  if (lastUserMessage) {
-    const textContent = (lastUserMessage.parts as Array<{ type: string, text?: string }>)
-      ?.filter((p) => p.type === 'text')
-      .map((p) => p.text ?? '')
-      .join('') ?? ''
+  const textContent = lastUserMessage?.parts
+    .filter((p) => p.type === 'text')
+    .map((p) => p.text ?? '')
+    .join('') ?? ''
+  if (textContent) {
     const queryEmbedding = await generateNoteEmbedding(textContent)
 
     const candidates = searchEmbeddings(sqlite, queryEmbedding, 20)
@@ -65,6 +70,21 @@ export async function POST(req: Request) {
     model: chatModel,
     system: systemMessage,
     messages: convertToModelMessages(messages),
+    onFinish: async (event) => {
+      if (textContent) {
+        await db.insert(chatMessages).values({
+          chatId,
+          role: 'user',
+          content: textContent,
+        })
+      }
+
+      await db.insert(chatMessages).values({
+        chatId,
+        role: 'assistant',
+        content: event.text
+      })
+    }
   })
 
   return result.toUIMessageStreamResponse()

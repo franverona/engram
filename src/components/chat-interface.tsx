@@ -82,8 +82,8 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] flex-col">
-      <div ref={scrollRef} className="chat-scroll flex-1 space-y-4 overflow-y-auto pb-4 pl-4">
+    <div className="flex flex-1 flex-col relative">
+      <div ref={scrollRef} className="chat-scroll bottom-0 flex-1 space-y-4 overflow-y-auto pb-28 pt-6 px-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-text-faint">
@@ -141,7 +141,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
           <TypingIndicator />
         )}
       </div>
-      <form onSubmit={handleSubmit} className="flex gap-2 border-t border-border pt-4 pl-4">
+      <form onSubmit={handleSubmit} className="flex absolute bottom-0 left-0 w-full gap-2 px-4 py-8 bg-background">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

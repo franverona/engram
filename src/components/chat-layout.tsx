@@ -82,8 +82,18 @@ export default function ChatLayout() {
   }
 
   return (
-    <div className="flex">
-      <div className="gap-2 w-3xs pr-2 border-r border-border">
+    <div className="flex h-[calc(100vh-53px)]">
+      <div className="chat-scroll overflow-y-auto w-3xs flex flex-col gap-2 py-6 px-4 border-r border-border">
+        <button
+          className="inline-flex items-center gap-2 w-full text-sm p-2 rounded-md text-white hover:bg-primary-hover cursor-pointer mb-5"
+          onClick={onClickStartChat}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14"/>
+            <path d="M12 5v14"/>
+          </svg>
+          <span>New chat</span>
+        </button>
         {chats?.map((chat) => (
           <div
             key={chat.id}
@@ -96,7 +106,7 @@ export default function ChatLayout() {
           </div>
         ))}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 flex">
         {activeChatId ? (
           <>
             {!isLoadingChatMessages && (
@@ -108,7 +118,7 @@ export default function ChatLayout() {
             )}
           </>
         ) : (
-          <div className="flex gap-4 flex-col items-center justify-center h-[calc(100vh-120px)]">
+          <div className="flex-1 flex gap-4 flex-col items-center justify-center">
             <div className="text-text-muted">
               Select a chat, or create a new one.
             </div>

@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import { LayoutInnerContent } from '@/components/layout'
 import { NotesList } from '@/components/notes-list'
 
 export default function HomePage() {
   return (
-    <div>
+    <LayoutInnerContent>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Your Notes</h1>
         <Link
@@ -18,6 +19,6 @@ export default function HomePage() {
         </Link>
       </div>
       <NotesList />
-    </div>
+    </LayoutInnerContent>
   )
 }

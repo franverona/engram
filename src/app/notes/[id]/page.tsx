@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { LayoutInnerContent } from '@/components/layout'
 import { MarkdownBody } from '@/components/markdown-body'
 import { serverTrpc } from '@/trpc/server'
 
@@ -12,7 +13,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div>
+    <LayoutInnerContent>
       <div className="mb-6 flex items-center justify-between">
         <Link href="/" className="text-sm text-text-muted hover:text-foreground">
           &larr; Back to notes
@@ -28,6 +29,6 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
         <h1 className="mb-4 text-2xl font-bold">{note.title}</h1>
         <MarkdownBody content={note.body} />
       </div>
-    </div>
+    </LayoutInnerContent>
   )
 }

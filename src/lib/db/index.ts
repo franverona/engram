@@ -7,6 +7,7 @@ import { initVecTable } from './vec'
 
 const sqlite = new Database(process.env.DATABASE_PATH ?? './data/engram.db')
 sqlite.pragma('journal_mode = WAL')
+sqlite.pragma('foreign_keys = ON')
 sqliteVec.load(sqlite)
 
 initVecTable(sqlite)

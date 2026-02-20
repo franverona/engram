@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { LayoutInnerContent } from '@/components/layout'
 import { NoteForm } from '@/components/note-form'
 import { serverTrpc } from '@/trpc/server'
 
@@ -12,7 +13,7 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <div>
+    <LayoutInnerContent>
       <div className="mb-6">
         <Link href="/" className="text-sm text-text-muted hover:text-foreground">
           &larr; Back to notes
@@ -26,6 +27,6 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
           initialBody={note.body}
         />
       </div>
-    </div>
+    </LayoutInnerContent>
   )
 }

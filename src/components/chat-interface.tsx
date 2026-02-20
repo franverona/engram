@@ -74,7 +74,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     const text = input
     setInput('')
 
-    if (initialMessages.length === 0) {
+    if (messages.length === 0) {
       updateChat.mutate({ id: chatId, title: text })
     }
 

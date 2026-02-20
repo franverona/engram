@@ -28,7 +28,7 @@ export function MobileNav() {
       </button>
       {open && (
         <div className="absolute left-0 right-0 top-full border-b border-border bg-surface/95 backdrop-blur-md">
-          <div className="mx-auto flex max-w-4xl flex-col gap-3 px-4 py-4">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4">
             <NavLink href="/" onClick={() => setOpen(false)}>Notes</NavLink>
             <NavLink href="/notes/new" onClick={() => setOpen(false)}>New Note</NavLink>
             <NavLink href="/search" onClick={() => setOpen(false)}>Search</NavLink>

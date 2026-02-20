@@ -50,6 +50,8 @@ Engram is a local-first notes app with hybrid search (FTS5 + vector) and RAG cha
 sqlite3 ./data/engram.db "CREATE TABLE ..."
 ```
 
+After any schema change to `src/lib/db/schema.ts`, also run `npx drizzle-kit generate` to keep the migration SQL files in sync with the schema.
+
 `drizzle-kit studio` has the same problem and is also broken. `drizzle-kit generate` (generates migration SQL files without connecting to the DB) still works. To inspect the database use the `sqlite3` CLI or a GUI tool like [TablePlus](https://tableplus.com) or [DB Browser for SQLite](https://sqlitebrowser.org).
 
 To reset the database from scratch:

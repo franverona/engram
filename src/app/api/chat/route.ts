@@ -8,7 +8,7 @@ import { db, sqlite } from '@/lib/db'
 import { chatMessages, notes } from '@/lib/db/schema'
 import { getEmbeddingsByIds, searchEmbeddings } from '@/lib/db/vec'
 
-type ApiRequest ={
+type ApiRequest = {
   chatId: number
   messages: UIMessage[]
 }
@@ -21,19 +21,13 @@ export async function POST(req: Request) {
     .find((m) => m.role === 'user')
 
   let context = ''
-
+  let textContent = ''
   if (lastUserMessage) {
-    const textContent = lastUserMessage.parts
+    textContent = lastUserMessage.parts
       .filter((p) => p.type === 'text')
       .map((p) => p.text ?? '')
       .join('') ?? ''
     const queryEmbedding = await generateNoteEmbedding(textContent)
-
-    await db.insert(chatMessages).values({
-      chatId,
-      role: 'user',
-      content: textContent,
-    })
 
     const candidates = searchEmbeddings(sqlite, queryEmbedding, 20)
     if (candidates.length > 0) {
@@ -78,6 +72,14 @@ export async function POST(req: Request) {
     system: systemMessage,
     messages: convertToModelMessages(messages),
     onFinish: async (event) => {
+      if (textContent) {
+        await db.insert(chatMessages).values({
+          chatId,
+          role: 'user',
+          content: textContent,
+        })
+      }
+
       await db.insert(chatMessages).values({
         chatId,
         role: 'assistant',

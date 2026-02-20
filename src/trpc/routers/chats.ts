@@ -36,8 +36,8 @@ export const chatsRouter = createTRPCRouter({
 
   getMessages: baseProcedure
     .input(z.object({ chatId: z.number() }))
-    .query(async ({ input }) => {
-      return await db
+    .query(({ input }) => {
+      return db
         .select()
         .from(chatMessages)
         .where(eq(chatMessages.chatId, input.chatId))

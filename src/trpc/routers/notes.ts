@@ -42,7 +42,15 @@ export const notesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const embedding = await generateNoteEmbedding(`${input.title}\n${input.body}`)
       const [updated] = sqlite.transaction(() => {
-        const [updated] = db.update(notes).set({ title: input.title, body: input.body }).where(eq(notes.id, input.id)).returning().all()
+        const [updated] = db
+          .update(notes)
+          .set({
+            title: input.title,
+            body: input.body
+          })
+          .where(eq(notes.id, input.id))
+          .returning()
+          .all()
         upsertEmbedding(sqlite, updated.id, embedding)
         upsertFts(sqlite, updated.id, input.title, input.body)
         return [updated]
@@ -74,7 +82,17 @@ export const notesRouter = createTRPCRouter({
       }
 
       const summary = await generateNoteSummary(note.title, note.body)
-      const [updated] = db.update(notes).set({ summary }).where(eq(notes.id, input.id)).returning().all()
+      const now = new Date().toISOString()
+      const [updated] = db
+        .update(notes)
+        .set({
+          summary,
+          summarizedAt: now,
+          updatedAt: now, // forced here to make both dates the same (avoiding $onUpdate)
+        })
+        .where(eq(notes.id, input.id))
+        .returning()
+        .all()
       return updated
     }),
 

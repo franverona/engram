@@ -3,14 +3,11 @@
 import type { UIMessage } from 'ai'
 import clsx from 'clsx'
 import { useState } from 'react'
+import type { chats } from '@/lib/db/schema'
 import { trpc } from '@/trpc/react'
 import { ChatInterface } from './chat-interface'
 
-type Chat = {
-  id: number
-  title: string
-  createdAt: string
-}
+type Chat = typeof chats.$inferSelect
 
 export default function ChatLayout() {
   const utils = trpc.useUtils()

@@ -2,7 +2,7 @@ import { inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { db, sqlite } from '@/lib/db'
-import { searchFts } from '@/lib/db/fts'
+import { searchFts, type SearchFtsResult } from '@/lib/db/fts'
 import { notes } from '@/lib/db/schema'
 import { searchEmbeddings } from '@/lib/db/vec'
 import { baseProcedure, createTRPCRouter } from '../init'
@@ -38,7 +38,7 @@ export const searchRouter = createTRPCRouter({
   hybrid: baseProcedure
     .input(z.object({ query: z.string().min(1), limit: z.number().optional() }))
     .query(async ({ input }) => {
-      let ftsResults: { note_id: number, rank: number }[] = []
+      let ftsResults: SearchFtsResult[] = []
       try {
         ftsResults = searchFts(sqlite, input.query, input.limit)
       } catch {

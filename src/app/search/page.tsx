@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { LayoutInnerContent } from '@/components/layout'
 import { SearchBar } from '@/components/search-bar'
 import { SearchResults } from '@/components/search-results'
 import { trpc } from '@/trpc/react'
@@ -14,7 +15,7 @@ export default function SearchPage() {
   )
 
   return (
-    <div>
+    <LayoutInnerContent>
       <h1 className="mb-2 text-2xl font-bold">Semantic Search</h1>
       <p className="mb-6 text-sm text-text-muted">
         Search your notes using natural language. Results are ranked by meaning, not just keywords.
@@ -57,6 +58,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </div>
+    </LayoutInnerContent>
   )
 }

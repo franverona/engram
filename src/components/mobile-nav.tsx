@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { NavLink } from './nav-link'
+import { NavLink } from './layout/nav-link'
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)

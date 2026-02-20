@@ -29,9 +29,12 @@ ollama pull nomic-embed-text
 ```bash
 npm install
 cp .env.example .env.local   # optional — defaults work without it
-npx drizzle-kit push          # create/migrate the database
+npx drizzle-kit generate      # generate migration SQL
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql   # apply it
 npm run dev
 ```
+
+> **Note:** `npx drizzle-kit push` is broken — see [Schema Changes](#schema-changes) below. Use `drizzle-kit generate` + `sqlite3` instead. The virtual tables (`note_embeddings`, `note_fts`) are created automatically on server start.
 
 Open [http://localhost:3000](http://localhost:3000).
 
@@ -72,6 +75,24 @@ See `.env.example` for all available options. Defaults work out of the box if Ol
 | `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Model used for embeddings |
 | `EMBEDDING_DIMENSION` | `768` | Vector dimension (must match embedding model) |
 | `DATABASE_PATH` | `./data/engram.db` | SQLite database file path |
+
+## Schema Changes
+
+`drizzle-kit push` is broken — it introspects the database without loading sqlite-vec, hits the `note_embeddings` virtual table and crashes. Use `drizzle-kit generate` to produce a SQL migration file and apply it manually:
+
+```bash
+npx drizzle-kit generate
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
+```
+
+## Resetting the Database
+
+```bash
+rm -f ./data/engram.db ./data/engram.db-shm ./data/engram.db-wal
+npx drizzle-kit generate
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
+npm run dev   # virtual tables are recreated automatically on startup
+```
 
 ## Running Tests
 

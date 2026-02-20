@@ -52,6 +52,16 @@ sqlite3 ./data/engram.db "CREATE TABLE ..."
 
 `drizzle-kit studio` has the same problem and is also broken. `drizzle-kit generate` (generates migration SQL files without connecting to the DB) still works. To inspect the database use the `sqlite3` CLI or a GUI tool like [TablePlus](https://tableplus.com) or [DB Browser for SQLite](https://sqlitebrowser.org).
 
+To reset the database from scratch:
+
+```bash
+rm -f ./data/engram.db ./data/engram.db-shm ./data/engram.db-wal
+npx drizzle-kit generate
+sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
+```
+
+Then restart the dev server — `initVecTable` and `initFtsTable` recreate the virtual tables automatically on startup. Drizzle does **not** auto-create tables; the migration SQL must be applied manually every time the database is reset.
+
 ## Docker
 
 - `next.config.ts` has `output: 'standalone'` — required for the multi-stage Docker build to produce a lean runtime image.

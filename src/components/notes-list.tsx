@@ -253,7 +253,7 @@ export function NotesList() {
                 </p>
                 <div className="mt-2.5 flex items-center gap-2">
                   <p className="text-xs text-text-faint">Last update: {timeAgo(note.updatedAt)}</p>
-                  {note.summarizedAt && note.updatedAt > note.summarizedAt && (
+                  {note.summarizedAt && !summarizingIds.has(note.id) && note.updatedAt > note.summarizedAt && (
                     <>
                       <div className="text-xs text-text-faint">·</div>
                       <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-amber-300 text-amber-900">

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useToast } from '@/components/toast'
 import { trpc } from '@/trpc/react'
+import { Spinner } from './ui'
 
 function stripMarkdown(text: string): string {
   return text
@@ -111,10 +112,47 @@ function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void, isPendi
   )
 }
 
+function SummarizeButton({
+  exists,
+  onClick,
+  isPending
+}: {
+  exists: boolean
+  onClick: () => void
+  isPending: boolean
+}) {
+  return (
+    <button
+      disabled={isPending}
+      onClick={onClick}
+      className="rounded-md p-1.5 text-text-faint hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:hover:bg-fuchsia-950 dark:hover:text-fuchsia-400"
+      aria-label={exists ? 'Regenerate summary' : 'Summarize note'}
+      title={exists ? 'Regenerate summary' : 'Summarize note'}
+    >
+      {isPending ? (
+        <Spinner />
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135
+  1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+          <path d="M20 3v4"/>
+          <path d="M22 5h-4"/>
+          <path d="M4 17v2"/>
+          <path d="M5 18H3"/>
+        </svg>
+      )}
+    </button>
+  )
+}
+
+const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > summarizedAt
+
 export function NotesList() {
   const { data: notesList, isLoading } = trpc.notes.list.useQuery()
   const utils = trpc.useUtils()
   const { showToast } = useToast()
+
+  const [summarizingIds, setSummarizingIds] = useState<Set<number>>(new Set())
 
   const deleteNote = trpc.notes.delete.useMutation({
     onMutate: async (input) => {
@@ -133,6 +171,26 @@ export function NotesList() {
     },
     onSettled: () => {
       utils.notes.list.invalidate()
+    },
+  })
+
+  const summarizeNote = trpc.notes.summarize.useMutation({
+    onMutate: (input) => {
+      setSummarizingIds(prev => new Set(prev).add(input.id))
+    },
+    onError: () => {
+      showToast('An error occurred when generating the summary')
+    },
+    onSuccess: () => {
+      showToast('Summary created successfully')
+    },
+    onSettled: (_note, _err, variables) => {
+      utils.notes.list.invalidate()
+      setSummarizingIds(prev => {
+        const next = new Set(prev)
+        next.delete(variables.id)
+        return next
+      })
     },
   })
 
@@ -179,22 +237,61 @@ export function NotesList() {
             key={note.id}
             className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-all hover:border-border-hover hover:shadow-md"
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <Link href={`/notes/${note.id}`} className="font-semibold leading-snug hover:text-primary">
-                  {note.title}
-                </Link>
-                <p className="mt-1.5 line-clamp-3 text-sm text-text-muted">
-                  {stripMarkdown(note.body)}
-                </p>
-                <p className="mt-2.5 text-xs text-text-faint">{timeAgo(note.createdAt)}</p>
-              </div>
-              <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
-                <EditButton href={`/notes/${note.id}/edit`} />
-                <DeleteButton
-                  onConfirm={() => deleteNote.mutate({ id: note.id })}
-                  isPending={deleteNote.isPending}
-                />
+            <div className="flex flex-col items-start justify-between gap-4">
+              <div className="min-w-0 w-full">
+                <div className="flex justify-between gap-4">
+                  <Link href={`/notes/${note.id}`} className="inline-flex flex-1 font-semibold leading-snug hover:text-primary truncate">
+                    {note.title}
+                  </Link>
+                  <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                    <SummarizeButton
+                      exists={!!note.summary}
+                      onClick={() => summarizeNote.mutate({ id: note.id })}
+                      isPending={summarizingIds.has(note.id)}
+                    />
+                    <EditButton href={`/notes/${note.id}/edit`} />
+                    <DeleteButton
+                      onConfirm={() => deleteNote.mutate({ id: note.id })}
+                      isPending={deleteNote.isPending}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2 line-clamp-4 text-sm text-text-muted">
+                  {summarizingIds.has(note.id) ? (
+                    <Spinner />
+                  ) : (
+                    <>{note.summary || stripMarkdown(note.body)}</>
+                  )}
+                </div>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <p className="text-xs text-text-faint">Last update: {timeAgo(note.updatedAt)}</p>
+                  {!summarizingIds.has(note.id) && (
+                    <>
+                      {note.summarizedAt && isSummaryStale(note.updatedAt, note.summarizedAt) && (
+                        <>
+                          <div className="text-xs text-text-faint">·</div>
+                          <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-amber-300 text-amber-900">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                              strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                              <line x1="12" y1="9" x2="12" y2="13"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            <span>Summary may be outdated</span>
+                          </div>
+                        </>
+                      )}
+                      {!note.summarizedAt && (
+                        <>
+                          <div className="text-xs text-text-faint">·</div>
+                          <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-neutral-100 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+                            No summary yet
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </li>

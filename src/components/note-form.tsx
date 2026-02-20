@@ -52,6 +52,8 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
         {
           id: tempId,
           ...input,
+          summary: null,
+          summarizedAt: null,
           createdAt: tempDate,
           updatedAt: tempDate,
         }
@@ -137,7 +139,7 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
             className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         ) : (
-          <div className="mt-1.5 min-h-[14.5rem] w-full rounded-lg border border-border bg-surface px-3.5 py-2.5">
+          <div className="mt-1.5 min-h-58 w-full rounded-lg border border-border bg-surface px-3.5 py-2.5">
             {body.trim() ? (
               <MarkdownBody content={body} />
             ) : (

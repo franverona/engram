@@ -1,6 +1,6 @@
 # Engram
 
-A local-first notes app with semantic search and RAG chat. Everything runs on your machine using [Ollama](https://ollama.com) for embeddings and LLM inference.
+A local-first notes app with hybrid search and RAG chat. Everything runs on your machine using [Ollama](https://ollama.com) for embeddings and LLM inference.
 
 ## Stack
 
@@ -8,6 +8,7 @@ A local-first notes app with semantic search and RAG chat. Everything runs on yo
 - **tRPC** for type-safe API layer
 - **Drizzle ORM** + **better-sqlite3** for persistence
 - **sqlite-vec** for vector similarity search
+- **SQLite FTS5** for lexical full-text search
 - **Vercel AI SDK** + **Ollama** for embeddings and chat
 - **Husky** + **lint-staged** + **commitlint** for Conventional Commits enforcement
 
@@ -95,11 +96,11 @@ src/
     api/trpc/       # tRPC handler
     chat/           # Chat page
     notes/new/      # Create note page
-    search/         # Semantic search page
+    search/         # Hybrid search page
   components/       # React components
   lib/
     ai/             # Ollama provider, embedding generation
-    db/             # Drizzle schema, sqlite-vec helpers
+    db/             # Drizzle schema, sqlite-vec helpers, FTS5 helpers
   trpc/             # tRPC router, React provider, server helpers
 data/               # SQLite database (gitignored)
 scripts/

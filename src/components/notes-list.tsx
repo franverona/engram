@@ -126,8 +126,8 @@ function SummarizeButton({
       disabled={isPending}
       onClick={onClick}
       className="rounded-md p-1.5 text-text-faint hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:hover:bg-fuchsia-950 dark:hover:text-fuchsia-400"
-      aria-label={exists ? 'Regenerate note' : 'Summarize note'}
-      title={exists ? 'Regenerate note' : 'Summarize note'}
+      aria-label={exists ? 'Regenerate summary' : 'Summarize note'}
+      title={exists ? 'Regenerate summary' : 'Summarize note'}
     >
       {isPending ? (
         <Spinner />
@@ -144,6 +144,8 @@ function SummarizeButton({
     </button>
   )
 }
+
+const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > summarizedAt
 
 export function NotesList() {
   const { data: notesList, isLoading } = trpc.notes.list.useQuery()
@@ -191,8 +193,6 @@ export function NotesList() {
       })
     },
   })
-
-  const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > summarizedAt
 
   if (isLoading) {
     return (
@@ -256,13 +256,13 @@ export function NotesList() {
                     />
                   </div>
                 </div>
-                <p className="mt-2 line-clamp-3 text-sm text-text-muted">
+                <div className="mt-2 line-clamp-4 text-sm text-text-muted">
                   {summarizingIds.has(note.id) ? (
                     <Spinner />
                   ) : (
                     <>{note.summary || stripMarkdown(note.body)}</>
                   )}
-                </p>
+                </div>
                 <div className="mt-2.5 flex items-center gap-2">
                   <p className="text-xs text-text-faint">Last update: {timeAgo(note.updatedAt)}</p>
                   {!summarizingIds.has(note.id) && (
@@ -284,7 +284,7 @@ export function NotesList() {
                       {!note.summarizedAt && (
                         <>
                           <div className="text-xs text-text-faint">·</div>
-                          <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-neutral-900 text-neutral-300">
+                          <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-neutral-100 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
                             No summary yet
                           </div>
                         </>

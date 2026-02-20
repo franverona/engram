@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { generateNoteSummary } from '@/lib/ai/summary'
@@ -11,7 +11,7 @@ import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
   list: baseProcedure.query(async () => {
-    return db.select().from(notes).orderBy(notes.createdAt)
+    return db.select().from(notes).orderBy(desc(notes.createdAt))
   }),
 
   getById: baseProcedure

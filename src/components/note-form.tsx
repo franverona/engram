@@ -52,6 +52,7 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
         {
           id: tempId,
           ...input,
+          summary: null,
           createdAt: tempDate,
           updatedAt: tempDate,
         }

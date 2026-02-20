@@ -6,15 +6,15 @@ type SearchResult = {
   body: string
   createdAt: string
   updatedAt: string
-  distance: number
+  score: number
 }
 
-function similarityPercentage(distance: number): number {
-  return Math.max(0, Math.round((1 - distance) * 100))
+function scoreToPercentage(score: number): number {
+  return Math.round((score / (2 / 61)) * 100)
 }
 
-function SimilarityBadge({ distance }: { distance: number }) {
-  const pct = similarityPercentage(distance)
+function SimilarityBadge({ score }: { score: number }) {
+  const pct = scoreToPercentage(score)
   const color =
     pct >= 80
       ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
@@ -51,7 +51,7 @@ export function SearchResults({ results }: { results: SearchResult[] }) {
         >
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-semibold leading-snug">{result.title}</h3>
-            <SimilarityBadge distance={result.distance} />
+            <SimilarityBadge score={result.score} />
           </div>
           <p className="mt-1.5 line-clamp-3 whitespace-pre-wrap text-sm text-text-muted">
             {result.body}

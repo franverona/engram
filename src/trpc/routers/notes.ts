@@ -52,13 +52,9 @@ export const notesRouter = createTRPCRouter({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       sqlite.transaction(() => {
-        const result = db.select().from(notes).where(eq(notes.id, input.id)).all()
-        const note = result[0] ?? null
-        if (note) {
-          deleteEmbedding(sqlite, note.id)
-          deleteFts(sqlite, note.id, note.title, note.body)
-          db.delete(notes).where(eq(notes.id, note.id)).run()
-        }
+        deleteEmbedding(sqlite, input.id)
+        deleteFts(sqlite, input.id)
+        db.delete(notes).where(eq(notes.id, input.id)).run()
       })()
       return { success: true }
     }),

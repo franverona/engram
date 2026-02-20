@@ -9,16 +9,16 @@ import { trpc } from '@/trpc/react'
 export default function SearchPage() {
   const [query, setQuery] = useState('')
 
-  const searchQuery = trpc.search.semantic.useQuery(
+  const searchQuery = trpc.search.hybrid.useQuery(
     { query },
     { enabled: query.length > 0 },
   )
 
   return (
     <LayoutInnerContent>
-      <h1 className="mb-2 text-2xl font-bold">Semantic Search</h1>
+      <h1 className="mb-2 text-2xl font-bold">Hybrid Search</h1>
       <p className="mb-6 text-sm text-text-muted">
-        Search your notes using natural language. Results are ranked by meaning, not just keywords.
+        Search your notes using natural language. Results are ranked by keyword and semantic similarity combined.
       </p>
       <div className="space-y-6">
         <SearchBar

@@ -38,7 +38,7 @@ export default function ChatLayout() {
     }))
   })
 
-  const createChat =  trpc.chats.create.useMutation({
+  const createChat = trpc.chats.create.useMutation({
     onMutate: async (input) => {
       await utils.chats.list.cancel()
       const previous = utils.chats.list.getData()

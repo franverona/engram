@@ -56,7 +56,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
       await utils.chats.list.cancel()
       const previous = utils.chats.list.getData()
       utils.chats.list.setData(undefined, (old) =>
-        old?.map((c) => (c.id === input.id? { ...c, ...input } : c))
+        old?.map((c) => (c.id === input.id ? { ...c, ...input } : c))
       )
       return { previous }
     },

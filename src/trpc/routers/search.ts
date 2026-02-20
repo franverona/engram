@@ -31,7 +31,7 @@ export const searchRouter = createTRPCRouter({
       return matchedNotes
         .map((note) => ({
           ...note,
-          distance: distanceMap.get(note.id) ?? 1,
+          distance: distanceMap.get(note.id) ?? 0,
         }))
         .sort((a, b) => a.distance - b.distance)
     }),
@@ -70,7 +70,7 @@ export const searchRouter = createTRPCRouter({
       return matchedNotes
         .map((note) => ({
           ...note,
-          score: rrfMatches.get(note.id) ?? 1,
+          score: rrfMatches.get(note.id) ?? 0,
         }))
         .sort((a, b) => b.score - a.score)
         .slice(0, input.limit ?? 5)

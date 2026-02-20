@@ -1,6 +1,8 @@
+import { TRPCError } from '@trpc/server'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
+import { generateNoteSummary } from '@/lib/ai/summary'
 import { db, sqlite } from '@/lib/db'
 import { deleteFts, upsertFts } from '@/lib/db/fts'
 import { notes } from '@/lib/db/schema'
@@ -58,4 +60,22 @@ export const notesRouter = createTRPCRouter({
       })()
       return { success: true }
     }),
+
+  summarize: baseProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const result = await db
+        .select()
+        .from(notes)
+        .where(eq(notes.id, input.id))
+      const note = result[0] ?? null
+      if (!note) {
+        throw new TRPCError({ code: 'NOT_FOUND' })
+      }
+
+      const summary = await generateNoteSummary(note.title, note.body)
+      const [updated] = db.update(notes).set({ summary }).where(eq(notes.id, input.id)).returning().all()
+      return updated
+    }),
+
 })

@@ -92,9 +92,7 @@ export default function ChatLayout() {
             <path d="M5 12h14"/>
             <path d="M12 5v14"/>
           </svg>
-          <span>
-            New chat
-          </span>
+          <span>New chat</span>
         </button>
         {chats?.map((chat) => (
           <div

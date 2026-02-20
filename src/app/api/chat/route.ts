@@ -21,12 +21,11 @@ export async function POST(req: Request) {
     .find((m) => m.role === 'user')
 
   let context = ''
-  let textContent = ''
-  if (lastUserMessage) {
-    textContent = lastUserMessage.parts
-      .filter((p) => p.type === 'text')
-      .map((p) => p.text ?? '')
-      .join('') ?? ''
+  const textContent = lastUserMessage?.parts
+    .filter((p) => p.type === 'text')
+    .map((p) => p.text ?? '')
+    .join('') ?? ''
+  if (textContent) {
     const queryEmbedding = await generateNoteEmbedding(textContent)
 
     const candidates = searchEmbeddings(sqlite, queryEmbedding, 20)

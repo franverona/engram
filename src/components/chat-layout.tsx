@@ -83,10 +83,10 @@ export default function ChatLayout() {
 
   return (
     <div className="flex h-[calc(100vh-53px)]">
-      <div className="chat-scroll overflow-y-auto gap-2 w-3xs py-6 pr-2 border-r border-border">
+      <div className="chat-scroll overflow-y-auto w-3xs flex flex-col gap-2 py-6 px-4 border-r border-border">
         <button
           className="inline-flex items-center gap-2 w-full text-sm p-2 rounded-md text-white hover:bg-primary-hover cursor-pointer mb-5"
-          onClick={() => onClickStartChat()}
+          onClick={onClickStartChat}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14"/>

@@ -1,9 +1,3 @@
-import LayoutContent from './layout-content'
-import LayoutInnerContent from './layout-inner-content'
-import LayoutNavBar from './layout-nav-bar'
-
-export {
-  LayoutContent,
-  LayoutInnerContent,
-  LayoutNavBar
-}
+export { default as LayoutContent } from './layout-content'
+export { default as LayoutInnerContent } from './layout-inner-content'
+export { default as LayoutNavBar } from './layout-nav-bar'

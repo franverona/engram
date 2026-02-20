@@ -83,7 +83,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
   return (
     <div className="flex flex-1 flex-col relative">
-      <div ref={scrollRef} className="chat-scroll bottom-0 flex-1 space-y-4 overflow-y-auto pb-30 pt-6 px-4">
+      <div ref={scrollRef} className="chat-scroll bottom-0 flex-1 space-y-4 overflow-y-auto pb-28 pt-6 px-4">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-text-faint">

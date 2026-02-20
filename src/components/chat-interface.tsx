@@ -51,7 +51,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
   const isStreaming = status === 'streaming'
 
-  const updateChat =  trpc.chats.update.useMutation({
+  const updateChat = trpc.chats.update.useMutation({
     onMutate: async (input) => {
       await utils.chats.list.cancel()
       const previous = utils.chats.list.getData()

@@ -74,7 +74,7 @@ export default function ChatLayout() {
     })
   }
 
-  const onClickSelectChat = (chatId:number) => setActiveChatId(chatId)
+  const onClickSelectChat = (chatId: number) => setActiveChatId(chatId)
 
   if (isLoadingChats) {
     return (

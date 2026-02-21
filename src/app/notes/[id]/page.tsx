@@ -27,6 +27,15 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
       </div>
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h1 className="mb-4 text-2xl font-bold">{note.title}</h1>
+        {note.tags.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {note.tags.map((tag) => (
+              <span key={tag} className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <MarkdownBody content={note.body} />
       </div>
     </LayoutInnerContent>

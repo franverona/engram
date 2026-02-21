@@ -149,10 +149,12 @@ const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > 
 
 export function NotesList() {
   const { data: notesList, isLoading } = trpc.notes.list.useQuery()
+  const { data: allTags } = trpc.tags.list.useQuery()
   const utils = trpc.useUtils()
   const { showToast } = useToast()
 
   const [summarizingIds, setSummarizingIds] = useState<Set<number>>(new Set())
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const deleteNote = trpc.notes.delete.useMutation({
     onMutate: async (input) => {
@@ -229,10 +231,40 @@ export function NotesList() {
     )
   }
 
+  const filtered = selectedTags.length === 0
+    ? notesList
+    : notesList.filter((note) => selectedTags.every((t) => note.tags.includes(t)))
+
+  const toggleTag = (name: string) =>
+    setSelectedTags((prev) =>
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+    )
+
   return (
     <>
+      {allTags && allTags.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {allTags.map((tag) => (
+            <button
+              key={tag.id}
+              type="button"
+              onClick={() => toggleTag(tag.name)}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                selectedTags.includes(tag.name)
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-secondary text-text-muted hover:text-foreground'
+              }`}
+            >
+              {tag.name}
+            </button>
+          ))}
+        </div>
+      )}
       <ul className="space-y-3">
-        {notesList.map((note) => (
+        {filtered.length === 0 && selectedTags.length > 0 && (
+          <p className="text-sm text-text-muted">No notes match the selected tags.</p>
+        )}
+        {filtered.map((note) => (
           <li
             key={note.id}
             className="group rounded-xl border border-border bg-surface p-5 shadow-sm transition-all hover:border-border-hover hover:shadow-md"
@@ -263,6 +295,15 @@ export function NotesList() {
                     <>{note.summary || stripMarkdown(note.body)}</>
                   )}
                 </div>
+                {note.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {note.tags.map((tag) => (
+                      <span key={tag} className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-2.5 flex items-center gap-2">
                   <p className="text-xs text-text-faint">Last update: {timeAgo(note.updatedAt)}</p>
                   {!summarizingIds.has(note.id) && (

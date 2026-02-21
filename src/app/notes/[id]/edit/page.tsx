@@ -25,6 +25,7 @@ export default async function EditNotePage({ params }: { params: Promise<{ id: s
           initialId={note.id}
           initialTitle={note.title}
           initialBody={note.body}
+          initialTags={note.tags}
         />
       </div>
     </LayoutInnerContent>

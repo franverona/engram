@@ -10,14 +10,17 @@ type NoteFormProps = {
   initialBody?: string
   initialTitle?: string
   initialId?: number
+  initialTags?: string[]
 }
 
-export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps) {
+export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: NoteFormProps) {
   const router = useRouter()
   const utils = trpc.useUtils()
   const { showToast } = useToast()
   const [title, setTitle] = useState(initialTitle || '')
   const [body, setBody] = useState(initialBody || '')
+  const [tagInput, setTagInput] = useState('')
+  const [tags, setTags] = useState<string[]>(initialTags ?? [])
   const [tab, setTab] = useState<'edit' | 'preview'>('edit')
 
   const updateNote = trpc.notes.update.useMutation({
@@ -54,6 +57,7 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
           ...input,
           summary: null,
           summarizedAt: null,
+          tags: input.tags ?? [],
           createdAt: tempDate,
           updatedAt: tempDate,
         }
@@ -75,16 +79,20 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (initialId) {
-      updateNote.mutate({
-        id: initialId,
-        title,
-        body
-      })
+      updateNote.mutate({ id: initialId, title, body, tags })
     } else {
-      createNote.mutate({
-        title,
-        body
-      })
+      createNote.mutate({ title, body, tags })
+    }
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const value = tagInput.trim().toLowerCase()
+      if (value && !tags.includes(value)) {
+        setTags([...tags, value])
+      }
+      setTagInput('')
     }
   }
 
@@ -106,6 +114,32 @@ export function NoteForm({ initialBody, initialId, initialTitle }: NoteFormProps
           placeholder="Give your note a title..."
           className="mt-1.5 block w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm placeholder:text-text-faint focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium">Tags</label>
+        <div className="mt-1.5 flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+          {tags.map((tag) => (
+            <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-2 py-0.5 text-sm font-medium">
+              {tag}
+              <button
+                type="button"
+                onClick={() => setTags(tags.filter((t) => t !== tag))}
+                className="text-text-faint hover:text-foreground"
+                aria-label={`Remove tag ${tag}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <input
+            type="text"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            placeholder={tags.length === 0 ? 'Add tags (press Enter or ,)' : ''}
+            className="min-w-24 flex-1 bg-transparent text-sm placeholder:text-text-faint focus:outline-none"
+          />
+        </div>
       </div>
       <div>
         <div className="flex items-center justify-between">

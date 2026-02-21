@@ -17,14 +17,13 @@ export const notesRouter = createTRPCRouter({
     }
 
     const noteIds = notesList.map((n) => n.id)
-    const noteTagsResults = db.select({
+    const noteTagsResults = await db.select({
       noteId: noteTags.noteId,
       name: tags.name,
     })
       .from(noteTags)
       .innerJoin(tags, eq(noteTags.tagId, tags.id))
       .where(inArray(noteTags.noteId, noteIds))
-      .all()
 
     const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
       const existing = acc.get(row.noteId) ?? []

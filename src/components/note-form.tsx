@@ -57,7 +57,7 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
           ...input,
           summary: null,
           summarizedAt: null,
-          tags: [],
+          tags: input.tags ?? [],
           createdAt: tempDate,
           updatedAt: tempDate,
         }

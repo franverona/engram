@@ -261,6 +261,9 @@ export function NotesList() {
         </div>
       )}
       <ul className="space-y-3">
+        {filtered.length === 0 && selectedTags.length > 0 && (
+          <p className="text-sm text-text-muted">No notes match the selected tags.</p>
+        )}
         {filtered.map((note) => (
           <li
             key={note.id}

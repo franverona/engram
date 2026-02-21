@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { generateNoteSummary } from '@/lib/ai/summary'
@@ -11,17 +11,52 @@ import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
   list: baseProcedure.query(async () => {
-    return db.select().from(notes).orderBy(desc(notes.createdAt))
+    const notesList = await db.select().from(notes).orderBy(desc(notes.createdAt))
+    if (notesList.length === 0) {
+      return []
+    }
+
+    const noteIds = notesList.map((n) => n.id)
+    const noteTagsResults = db.select({
+      noteId: noteTags.noteId,
+      name: tags.name,
+    })
+      .from(noteTags)
+      .innerJoin(tags, eq(noteTags.tagId, tags.id))
+      .where(inArray(noteTags.noteId, noteIds))
+      .all()
+
+    const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
+      const existing = acc.get(row.noteId) ?? []
+      acc.set(row.noteId, [...existing, row.name])
+      return acc
+    }, new Map<number, string[]>())
+
+    return notesList.map((note) => ({
+      ...note,
+      tags: tagsByNoteId.get(note.id) ?? [],
+    }))
   }),
 
   getById: baseProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      const result = await db
-        .select()
+      const rows = db.select({
+        note: notes,
+        tagName: tags.name,
+      })
         .from(notes)
+        .leftJoin(noteTags, eq(noteTags.noteId, notes.id))
+        .leftJoin(tags, eq(tags.id, noteTags.tagId))
         .where(eq(notes.id, input.id))
-      return result[0] ?? null
+        .all()
+
+      if (rows.length === 0) return null
+
+      return {
+        ...rows[0].note,
+        tags: rows.map(r => r.tagName).filter(Boolean) as string[],
+      }
     }),
 
   create: baseProcedure

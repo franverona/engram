@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 
 export const notes = sqliteTable('notes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -35,3 +35,15 @@ export const chatMessages = sqliteTable('chat_messages', {
     .notNull()
     .default(sql`(datetime('now'))`),
 })
+
+export const tags = sqliteTable('tags', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull().unique(),
+})
+
+export const noteTags = sqliteTable('note_tags', {
+  noteId: integer('note_id').notNull().references(() => notes.id, { onDelete: 'cascade' }),
+  tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, (table) => [
+  primaryKey({ columns: [table.noteId, table.tagId] })
+])

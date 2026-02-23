@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { desc, eq, inArray } from 'drizzle-orm'
+import { asc, desc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { generateNoteSummary } from '@/lib/ai/summary'
@@ -10,32 +10,40 @@ import { upsertEmbedding, deleteEmbedding } from '@/lib/db/vec'
 import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
-  list: baseProcedure.query(async () => {
-    const notesList = await db.select().from(notes).orderBy(desc(notes.createdAt))
-    if (notesList.length === 0) {
-      return []
-    }
+  list: baseProcedure
+    .input(z.object({ sortBy: z.enum(['createdAt', 'updatedAt', 'title']).optional() }).optional())
+    .query(async ({ input }) => {
+      const secondarySort = input?.sortBy === 'title'
+        ? asc(notes.title)
+        : desc(notes[input?.sortBy ?? 'createdAt'])
+      const notesList = await db
+        .select()
+        .from(notes)
+        .orderBy(desc(notes.pinned), secondarySort)
+      if (notesList.length === 0) {
+        return []
+      }
 
-    const noteIds = notesList.map((n) => n.id)
-    const noteTagsResults = await db.select({
-      noteId: noteTags.noteId,
-      name: tags.name,
-    })
-      .from(noteTags)
-      .innerJoin(tags, eq(noteTags.tagId, tags.id))
-      .where(inArray(noteTags.noteId, noteIds))
+      const noteIds = notesList.map((n) => n.id)
+      const noteTagsResults = await db.select({
+        noteId: noteTags.noteId,
+        name: tags.name,
+      })
+        .from(noteTags)
+        .innerJoin(tags, eq(noteTags.tagId, tags.id))
+        .where(inArray(noteTags.noteId, noteIds))
 
-    const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
-      const existing = acc.get(row.noteId) ?? []
-      acc.set(row.noteId, [...existing, row.name])
-      return acc
-    }, new Map<number, string[]>())
+      const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
+        const existing = acc.get(row.noteId) ?? []
+        acc.set(row.noteId, [...existing, row.name])
+        return acc
+      }, new Map<number, string[]>())
 
-    return notesList.map((note) => ({
-      ...note,
-      tags: tagsByNoteId.get(note.id) ?? [],
-    }))
-  }),
+      return notesList.map((note) => ({
+        ...note,
+        tags: tagsByNoteId.get(note.id) ?? [],
+      }))
+    }),
 
   getById: baseProcedure
     .input(z.object({ id: z.number() }))
@@ -165,4 +173,21 @@ export const notesRouter = createTRPCRouter({
       return updated
     }),
 
+  pin: baseProcedure
+    .input(z.object({ id: z.number(), pinned: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const current = db.select({ updatedAt: notes.updatedAt })
+        .from(notes)
+        .where(eq(notes.id, input.id))
+        .get()
+      if (!current) throw new TRPCError({ code: 'NOT_FOUND' })
+
+      const [updated] = db
+        .update(notes)
+        .set({ pinned: input.pinned, updatedAt: current.updatedAt })
+        .where(eq(notes.id, input.id))
+        .returning()
+        .all()
+      return updated
+    })
 })

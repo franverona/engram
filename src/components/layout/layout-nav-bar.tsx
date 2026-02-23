@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Kbd } from '@/components/ui/kbd'
 import { MobileNav } from '../mobile-nav'
 import { NavLink } from './nav-link'
 
@@ -29,7 +30,9 @@ export default function LayoutNavBar() {
         </Link>
         <div className="hidden flex-1 sm:flex gap-5 py-2">
           <NavLink href="/">Notes</NavLink>
-          <NavLink href="/search">Search</NavLink>
+          <NavLink href="/search">
+            <span className="flex items-center gap-1.5">Search <Kbd keys={['⌘', 'K']} /></span>
+          </NavLink>
           <NavLink href="/chat">Chat</NavLink>
         </div>
         <MobileNav />

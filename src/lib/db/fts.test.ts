@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { initFtsTable, upsertFts, searchFts, deleteFts } from './fts'
+import { initFtsTable, upsertFts, searchFts, deleteFts, sanitizeFtsQuery } from './fts'
 
 describe('fts', () => {
   let db: Database.Database
@@ -100,6 +100,23 @@ describe('fts', () => {
       const results = searchFts(db, 'hello')
       expect(results).toHaveLength(1)
       expect(results[0].note_id).toBe(2)
+    })
+  })
+
+  describe('sanitizeFtsQuery', () => {
+    it('wraps string with quotes', () => {
+      const sanitized = sanitizeFtsQuery('hello')
+      expect(sanitized).toBe('"hello"')
+    })
+
+    it('escape quotes from string', () => {
+      const sanitized = sanitizeFtsQuery('"hello"')
+      expect(sanitized).toBe('"""hello"""')
+    })
+
+    it('prevents boolean operators from breaking FTS5', () => {
+      const sanitized = sanitizeFtsQuery('hello AND world')
+      expect(sanitized).toBe('"hello AND world"')
     })
   })
 })

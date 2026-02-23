@@ -19,6 +19,10 @@ export function upsertFts(
   db.prepare('INSERT INTO note_fts (rowid, title, body) VALUES (?, ?, ?)').run(noteId, title, body)
 }
 
+export function sanitizeFtsQuery(query: string): string {
+  return `"${query.replaceAll('"', '""')}"`
+}
+
 export type SearchFtsResult = {
   note_id: number
   rank: number

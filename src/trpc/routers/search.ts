@@ -2,7 +2,7 @@ import { inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { db, sqlite } from '@/lib/db'
-import { searchFts, type SearchFtsResult } from '@/lib/db/fts'
+import { sanitizeFtsQuery, searchFts, type SearchFtsResult } from '@/lib/db/fts'
 import { notes } from '@/lib/db/schema'
 import { searchEmbeddings } from '@/lib/db/vec'
 import { baseProcedure, createTRPCRouter } from '../init'
@@ -40,9 +40,12 @@ export const searchRouter = createTRPCRouter({
     .query(async ({ input }) => {
       let ftsResults: SearchFtsResult[] = []
       try {
-        ftsResults = searchFts(sqlite, input.query, input.limit)
-      } catch {
+        ftsResults = searchFts(sqlite, sanitizeFtsQuery(input.query), input.limit)
+      } catch (err) {
         // malformed FTS5 query — skip lexical leg
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[FTS] query failed, skipping lexical leg:', err)
+        }
       }
 
       const queryEmbedding = await generateNoteEmbedding(input.query)

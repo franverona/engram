@@ -101,6 +101,7 @@ export default function ChatLayout() {
               'font-semibold bg-gray-950': activeChatId === chat.id
             })}
             onClick={() => onClickSelectChat(chat.id)}
+            title={chat.title}
           >
             {chat.title}
           </div>

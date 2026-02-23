@@ -68,6 +68,26 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     },
   })
 
+  const generateTitle = trpc.chats.generateTitle.useMutation({
+    onMutate: async (input) => {
+      await utils.chats.list.cancel()
+      const previous = utils.chats.list.getData()
+      utils.chats.list.setData(undefined, (old) =>
+        old?.map((c) => (c.id === chatId ? { ...c, title: input.message } : c))
+      )
+      return { previous }
+    },
+    onSuccess: async (title) => {
+      updateChat.mutate({ id: chatId, title })
+    },
+    onError: (_err, _input, ctx) => {
+      utils.chats.list.setData(undefined, ctx?.previous)
+    },
+    onSettled: () => {
+      utils.chats.list.invalidate()
+    },
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
@@ -75,7 +95,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     setInput('')
 
     if (messages.length === 0) {
-      updateChat.mutate({ id: chatId, title: text })
+      generateTitle.mutate({ message: text })
     }
 
     await sendMessage({ text })

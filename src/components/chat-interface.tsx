@@ -6,6 +6,8 @@ import { DefaultChatTransport } from 'ai'
 import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { MarkdownBody } from '@/components/markdown-body'
+import { Kbd } from '@/components/ui/kbd'
+import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { trpc } from '@/trpc/react'
 
 function TypingIndicator() {
@@ -42,6 +44,13 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
 
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  useKeyboardShortcut({
+    key: 'Enter',
+    ctrl: true,
+    meta: true,
+    callback: async () => await onSendMessage()
+  })
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -88,8 +97,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     },
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSendMessage = async () => {
     if (!input.trim()) return
     const text = input
     setInput('')
@@ -99,6 +107,11 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
     }
 
     await sendMessage({ text })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await onSendMessage()
   }
 
   return (
@@ -177,7 +190,7 @@ export function ChatInterface({ chatId, initialMessages }: ChatInterfaceProps) {
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
-          Send
+          Send <Kbd keys={['⌘', '↵']} />
         </button>
       </form>
     </div>

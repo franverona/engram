@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MarkdownBody } from '@/components/markdown-body'
 import { useToast } from '@/components/toast'
+import { Kbd } from '@/components/ui/kbd'
+import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { calcReadingTime } from '@/lib/text'
 import { trpc } from '@/trpc/react'
 
@@ -23,6 +25,18 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>(initialTags ?? [])
   const [tab, setTab] = useState<'edit' | 'preview'>('edit')
+
+  useKeyboardShortcut({
+    key: 'Enter',
+    ctrl: true,
+    meta: true,
+    callback: () => onSave()
+  })
+
+  useKeyboardShortcut({
+    key: 'Escape',
+    callback: () => router.push('/')
+  })
 
   const updateNote = trpc.notes.update.useMutation({
     onMutate: async (input) => {
@@ -78,13 +92,17 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSave = () => {
     if (initialId) {
       updateNote.mutate({ id: initialId, title, body, tags })
     } else {
       createNote.mutate({ title, body, tags })
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave()
   }
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -206,7 +224,7 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />
             </svg>
-            {initialId ? 'Save changes' : 'Save Note'}
+            {initialId ? 'Save changes' : 'Save Note'} <Kbd keys={['⌘', '↵']} />
           </>
         )}
       </button>

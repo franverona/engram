@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import KeyboardShortcuts from '@/components/keyboard-shortcuts'
 import { LayoutContent, LayoutNavBar } from '@/components/layout'
 import { ToastProvider } from '@/components/toast'
 import { TRPCProvider } from '@/trpc/react'
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ToastProvider>
             <LayoutNavBar />
             <LayoutContent>{children}</LayoutContent>
+            <KeyboardShortcuts />
           </ToastProvider>
         </TRPCProvider>
       </body>

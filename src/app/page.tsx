@@ -2,7 +2,7 @@ import Link from 'next/link'
 import BulkExportButton from '@/components/bulk-export-button'
 import { LayoutInnerContent } from '@/components/layout'
 import { NotesList } from '@/components/notes-list'
-import { ErrorBoundary } from '@/components/ui'
+import { ErrorBoundary, Kbd } from '@/components/ui'
 
 export default function HomePage() {
   return (
@@ -20,7 +20,7 @@ export default function HomePage() {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              New Note
+              New Note <Kbd keys={['N']} />
             </Link>
           </div>
         </div>

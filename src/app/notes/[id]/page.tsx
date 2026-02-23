@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { LayoutInnerContent } from '@/components/layout'
 import { MarkdownBody } from '@/components/markdown-body'
+import { calcReadingTime } from '@/lib/text'
 import { serverTrpc } from '@/trpc/server'
 
 export default async function NoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -11,6 +12,8 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
   if (!note) {
     notFound()
   }
+
+  const readingTime = calcReadingTime(note.body)
 
   return (
     <LayoutInnerContent>
@@ -26,7 +29,8 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
         </Link>
       </div>
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h1 className="mb-4 text-2xl font-bold">{note.title}</h1>
+        <h1 className="text-2xl font-bold">{note.title}</h1>
+        <div className="mt-1.5 mb-4 text-xs text-text-faint">{readingTime.words} words · ~{readingTime.minutes} min read · {note.body.length} characters</div>
         {note.tags.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-1.5">
             {note.tags.map((tag) => (

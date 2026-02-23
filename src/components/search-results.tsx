@@ -1,11 +1,8 @@
 'use client'
 
-type SearchResult = {
-  id: number
-  title: string
-  body: string
-  createdAt: string
-  updatedAt: string
+import type { notes } from '@/lib/db/schema'
+
+type SearchResult = typeof notes.$inferSelect & {
   score: number
 }
 
@@ -54,7 +51,7 @@ export function SearchResults({ results }: { results: SearchResult[] }) {
             <SimilarityBadge score={result.score} />
           </div>
           <p className="mt-1.5 line-clamp-3 whitespace-pre-wrap text-sm text-text-muted">
-            {result.body}
+            {result.summary || result.body}
           </p>
         </li>
       ))}

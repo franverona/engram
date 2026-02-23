@@ -8,9 +8,10 @@ import { trpc } from '@/trpc/react'
 
 export default function SearchPage() {
   const [query, setQuery] = useState('')
+  const [limit, setLimit] = useState(5)
 
   const searchQuery = trpc.search.hybrid.useQuery(
-    { query },
+    { query, limit },
     { enabled: query.length > 0 },
   )
 
@@ -25,6 +26,18 @@ export default function SearchPage() {
           onSearch={setQuery}
           isLoading={searchQuery.isFetching}
         />
+        <div className="text-right">
+          <div className="flex justify-end items-center gap-4">
+            <label htmlFor="limitResults" className="block text-sm font-medium">
+              Show:
+            </label>
+            <select id="limitResults" className="rounded-lg border border-border bg-surface px-3.5 py-2 text-sm shadow-sm" value={limit} onChange={(e) => setLimit(Number(e.target.value))}>
+              <option value={5}>5 results</option>
+              <option value={10}>10 results</option>
+              <option value={20}>20 results</option>
+            </select>
+          </div>
+        </div>
         {searchQuery.isFetching && !searchQuery.data && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useToast } from '@/components/toast'
 import { trpc } from '@/trpc/react'
+import { DeleteButton, EditButton, ExportButton, PinButton, SummarizeButton } from './action-buttons'
 import { Spinner } from './ui'
 
 function stripMarkdown(text: string): string {
@@ -53,137 +54,6 @@ function SkeletonCard() {
         </div>
       </div>
     </div>
-  )
-}
-
-function EditButton({ href }: { href: string }) {
-  return (
-    <Link
-      aria-label="Edit note"
-      href={href}
-      className="rounded-md p-1.5 text-text-faint hover:bg-lime-50 hover:text-lime-600 dark:hover:bg-lime-950 dark:hover:text-lime-400"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0
-  .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
-        <path d="m15 5 4 4"/>
-      </svg>
-    </Link>
-  )
-}
-
-function DeleteButton({ onConfirm, isPending }: { onConfirm: () => void, isPending: boolean }) {
-  const [confirming, setConfirming] = useState(false)
-
-  if (confirming) {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => { onConfirm(); setConfirming(false) }}
-          disabled={isPending}
-          className="rounded-md bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
-        >
-          {isPending ? 'Deleting...' : 'Confirm'}
-        </button>
-        <button
-          onClick={() => setConfirming(false)}
-          className="rounded-md px-2.5 py-1 text-xs font-medium text-text-muted hover:text-foreground"
-        >
-          Cancel
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <button
-      onClick={() => setConfirming(true)}
-      className="rounded-md p-1.5 text-text-faint hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
-      aria-label="Delete note"
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6" />
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        <line x1="10" y1="11" x2="10" y2="17" />
-        <line x1="14" y1="11" x2="14" y2="17" />
-      </svg>
-    </button>
-  )
-}
-
-function SummarizeButton({
-  exists,
-  onClick,
-  isPending
-}: {
-  exists: boolean
-  onClick: () => void
-  isPending: boolean
-}) {
-  return (
-    <button
-      disabled={isPending}
-      onClick={onClick}
-      className="rounded-md p-1.5 text-text-faint hover:bg-fuchsia-50 hover:text-fuchsia-600 dark:hover:bg-fuchsia-950 dark:hover:text-fuchsia-400"
-      aria-label={exists ? 'Regenerate summary' : 'Summarize note'}
-      title={exists ? 'Regenerate summary' : 'Summarize note'}
-    >
-      {isPending ? (
-        <Spinner />
-      ) : (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135
-  1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-          <path d="M20 3v4"/>
-          <path d="M22 5h-4"/>
-          <path d="M4 17v2"/>
-          <path d="M5 18H3"/>
-        </svg>
-      )}
-    </button>
-  )
-}
-
-function PinButton({
-  pinned,
-  onClick,
-  isPending
-}: {
-  pinned: boolean
-  onClick: () => void
-  isPending: boolean
-}) {
-  return (
-    <button
-      disabled={isPending}
-      onClick={onClick}
-      className="rounded-md p-1.5 text-text-faint hover:bg-yellow-50 hover:text-yellow-600 dark:hover:bg-yellow-950 dark:hover:text-yellow-400"
-      aria-label={pinned ? 'Unpin note' : 'Pin note'}
-      title={pinned ? 'Unpin note' : 'Pin note'}
-    >
-      {isPending ? (
-        <Spinner />
-      ) : (
-        <>
-          {pinned ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"
-              strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" x2="12" y1="17" y2="22" fill="none" />
-              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
-  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-              strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" x2="12" y1="17" y2="22" />
-              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
-  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
-            </svg>
-          )}
-        </>
-      )}
-    </button>
   )
 }
 
@@ -358,7 +228,7 @@ export function NotesList() {
           >
             <div className="flex flex-col items-start justify-between gap-4">
               <div className="min-w-0 w-full">
-                <div className="flex justify-between gap-4">
+                <div className="flex items-center justify-between gap-4">
                   <Link href={`/notes/${note.id}`} className="inline-flex gap-2 flex-1 font-semibold leading-snug hover:text-primary truncate">
                     {note.pinned && (
                       <span className="text-yellow-300 pt-0.5">
@@ -370,7 +240,7 @@ export function NotesList() {
                         </svg>
                       </span>
                     )}
-                    <span>
+                    <span className="truncate">
                       {note.title}
                     </span>
                   </Link>
@@ -380,6 +250,7 @@ export function NotesList() {
                       onClick={() => pinNote.mutate({ id: note.id, pinned: !note.pinned })}
                       isPending={pinningIds.has(note.id)}
                     />
+                    <ExportButton note={note} />
                     <SummarizeButton
                       exists={!!note.summary}
                       onClick={() => summarizeNote.mutate({ id: note.id })}

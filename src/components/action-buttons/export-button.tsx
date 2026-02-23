@@ -1,22 +1,9 @@
 'use client'
 
 import type { notes } from '@/lib/db/schema'
+import { downloadFile, slugify } from '@/lib/export'
 import type { ActionButtonBaseProps } from './action-button'
 import ActionButton from './action-button'
-
-function downloadFile(filename: string, content: string) {
-  const blob = new Blob([content], { type: 'text/markdown' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-function slugify(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-}
 
 export default function ExportButton({
   note,

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { MarkdownBody } from '@/components/markdown-body'
 import { useToast } from '@/components/toast'
+import { calcReadingTime } from '@/lib/text'
 import { trpc } from '@/trpc/react'
 
 type NoteFormProps = {
@@ -99,6 +100,8 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
   const isPending = createNote.isPending || updateNote.isPending
   const error = createNote.error || updateNote.error
 
+  const readingTime = calcReadingTime(body)
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
@@ -159,7 +162,7 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
               Preview
             </button>
           </div>
-          <span className="text-xs text-text-faint">{body.length} characters</span>
+          <span className="text-xs text-text-faint">{readingTime.words} words · ~{readingTime.minutes} min read · {body.length} characters</span>
         </div>
         {tab === 'edit' ? (
           <textarea

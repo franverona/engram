@@ -29,6 +29,13 @@
       "when": 1771676628045,
       "tag": "0003_aberrant_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1771857125500,
+      "tag": "0004_pink_black_bolt",
+      "breakpoints": true
     }
   ]
 }

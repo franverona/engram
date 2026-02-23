@@ -56,6 +56,7 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
         {
           id: tempId,
           ...input,
+          pinned: false,
           summary: null,
           summarizedAt: null,
           tags: input.tags ?? [],

@@ -6,6 +6,7 @@ export const notes = sqliteTable('notes', {
   title: text('title').notNull(),
   body: text('body').notNull(),
   summary: text('summary'),
+  pinned: integer('pinned', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),

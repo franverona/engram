@@ -145,21 +145,69 @@ function SummarizeButton({
   )
 }
 
+function PinButton({
+  pinned,
+  onClick,
+  isPending
+}: {
+  pinned: boolean
+  onClick: () => void
+  isPending: boolean
+}) {
+  return (
+    <button
+      disabled={isPending}
+      onClick={onClick}
+      className="rounded-md p-1.5 text-text-faint hover:bg-yellow-50 hover:text-yellow-600 dark:hover:bg-yellow-950 dark:hover:text-yellow-400"
+      aria-label={pinned ? 'Unpin note' : 'Pin note'}
+      title={pinned ? 'Unpin note' : 'Pin note'}
+    >
+      {isPending ? (
+        <Spinner />
+      ) : (
+        <>
+          {pinned ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" x2="12" y1="17" y2="22" fill="none" />
+              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
+  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" x2="12" y1="17" y2="22" />
+              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
+  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+            </svg>
+          )}
+        </>
+      )}
+    </button>
+  )
+}
+
 const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > summarizedAt
 
+type SortByFields = 'createdAt' | 'updatedAt' | 'title'
+
 export function NotesList() {
-  const { data: notesList, isLoading } = trpc.notes.list.useQuery()
+  const [sortBy, setSortBy] = useState<SortByFields>('updatedAt')
+  const { data: notesList, isLoading } = trpc.notes.list.useQuery({
+    sortBy,
+  })
   const { data: allTags } = trpc.tags.list.useQuery()
   const utils = trpc.useUtils()
   const { showToast } = useToast()
 
   const [summarizingIds, setSummarizingIds] = useState<Set<number>>(new Set())
+  const [pinningIds, setPinningIds] = useState<Set<number>>(new Set())
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const deleteNote = trpc.notes.delete.useMutation({
     onMutate: async (input) => {
       await utils.notes.list.cancel()
-      const previous = utils.notes.list.getData()
+      const previous = utils.notes.list.getData({ sortBy })
       utils.notes.list.setData(undefined, (old) =>
         old?.filter((n) => n.id !== input.id)
       )
@@ -189,6 +237,33 @@ export function NotesList() {
     onSettled: (_note, _err, variables) => {
       utils.notes.list.invalidate()
       setSummarizingIds(prev => {
+        const next = new Set(prev)
+        next.delete(variables.id)
+        return next
+      })
+    },
+  })
+
+  const pinNote = trpc.notes.pin.useMutation({
+    onMutate: async (input) => {
+      setPinningIds(prev => new Set(prev).add(input.id))
+      await utils.notes.list.cancel()
+      const previous = utils.notes.list.getData({ sortBy })
+      utils.notes.list.setData({ sortBy }, (old) =>
+        old?.map((n) => n.id === input.id ? { ...n, pinned: input.pinned } : n)
+      )
+      return { previous }
+    },
+    onError: (_e, input, ctx) => {
+      utils.notes.list.setData({ sortBy }, ctx?.previous)
+      showToast(input.pinned ? 'An error occurred when pinning the note' : 'An error occurred when unpinning the note')
+    },
+    onSuccess: (data) => {
+      showToast(data.pinned ? 'Note pinned' : 'Note unpinned')
+    },
+    onSettled: (_note, _err, variables) => {
+      utils.notes.list.invalidate()
+      setPinningIds(prev => {
         const next = new Set(prev)
         next.delete(variables.id)
         return next
@@ -242,6 +317,18 @@ export function NotesList() {
 
   return (
     <>
+      <div className="mb-2 text-right">
+        <div className="flex justify-end items-center gap-4">
+          <label htmlFor="sortBy" className="block text-sm font-medium">
+            Sort by:
+          </label>
+          <select id="sortBy" className="rounded-lg border border-border bg-surface px-3.5 py-2 text-sm shadow-sm" value={sortBy} onChange={(e) => setSortBy(e.target.value as SortByFields)}>
+            <option value="updatedAt">Update date</option>
+            <option value="createdAt">Create date</option>
+            <option value="title">Title</option>
+          </select>
+        </div>
+      </div>
       {allTags && allTags.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-1.5">
           {allTags.map((tag) => (
@@ -272,10 +359,27 @@ export function NotesList() {
             <div className="flex flex-col items-start justify-between gap-4">
               <div className="min-w-0 w-full">
                 <div className="flex justify-between gap-4">
-                  <Link href={`/notes/${note.id}`} className="inline-flex flex-1 font-semibold leading-snug hover:text-primary truncate">
-                    {note.title}
+                  <Link href={`/notes/${note.id}`} className="inline-flex gap-2 flex-1 font-semibold leading-snug hover:text-primary truncate">
+                    {note.pinned && (
+                      <span className="text-yellow-300 pt-0.5">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"
+                          strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" x2="12" y1="17" y2="22" fill="none" />
+                          <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
+  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+                        </svg>
+                      </span>
+                    )}
+                    <span>
+                      {note.title}
+                    </span>
                   </Link>
                   <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                    <PinButton
+                      pinned={note.pinned}
+                      onClick={() => pinNote.mutate({ id: note.id, pinned: !note.pinned })}
+                      isPending={pinningIds.has(note.id)}
+                    />
                     <SummarizeButton
                       exists={!!note.summary}
                       onClick={() => summarizeNote.mutate({ id: note.id })}

@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { EditButton } from '@/components/action-buttons'
+import { ExportButton } from '@/components/action-buttons'
 import { LayoutInnerContent } from '@/components/layout'
 import { MarkdownBody } from '@/components/markdown-body'
 import { calcReadingTime } from '@/lib/text'
@@ -21,12 +23,10 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
         <Link href="/" className="text-sm text-text-muted hover:text-foreground">
           &larr; Back to notes
         </Link>
-        <Link
-          href={`/notes/${note.id}/edit`}
-          className="rounded-lg border border-border px-3.5 py-2 text-sm font-medium hover:border-border-hover hover:bg-surface-secondary"
-        >
-          Edit
-        </Link>
+        <div className="flex gap-2">
+          <ExportButton withLabel note={note} />
+          <EditButton withLabel href={`/notes/${note.id}/edit`} />
+        </div>
       </div>
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h1 className="text-2xl font-bold">{note.title}</h1>

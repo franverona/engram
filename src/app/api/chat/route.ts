@@ -1,6 +1,7 @@
 import type { UIMessage } from 'ai'
 import { convertToModelMessages, streamText } from 'ai'
 import { inArray } from 'drizzle-orm'
+import z from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { mmr } from '@/lib/ai/mmr'
 import { chatModel } from '@/lib/ai/ollama'
@@ -8,14 +9,18 @@ import { db, sqlite } from '@/lib/db'
 import { chatMessages, notes } from '@/lib/db/schema'
 import { getEmbeddingsByIds, searchEmbeddings } from '@/lib/db/vec'
 
-type ApiRequest = {
-  chatId: number
-  messages: UIMessage[]
-}
+const apiRequestSchema = z.object({
+  chatId: z.number(),
+  messages: z.array(z.custom<UIMessage>((val) => typeof val === 'object' && val !== null && 'role' in val))
+})
 
 export async function POST(req: Request) {
-  const { chatId, messages } = await req.json() as ApiRequest
+  const request = apiRequestSchema.safeParse(await req.json())
+  if (!request.success) {
+    return Response.json({ error: 'Invalid request' }, { status: 400 })
+  }
 
+  const { chatId, messages } = request.data
   const lastUserMessage = [...messages]
     .reverse()
     .find((m) => m.role === 'user')

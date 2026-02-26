@@ -66,9 +66,20 @@ type Note = typeof notes.$inferSelect
 
 export function NotesList() {
   const [sortBy, setSortBy] = useState<SortByFields>('updatedAt')
-  const { data: notesList, isLoading } = trpc.notes.list.useQuery({
-    sortBy,
-  })
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = trpc.notes.list.useInfiniteQuery(
+    { sortBy },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor
+    }
+  )
+  const notesList = data?.pages.flatMap((page) => page.items) ?? []
+
   const { data: allTags } = trpc.tags.list.useQuery()
   const utils = trpc.useUtils()
   const { showToast } = useToast()
@@ -114,14 +125,21 @@ export function NotesList() {
     onMutate: async (input) => {
       setPinningIds(prev => new Set(prev).add(input.id))
       await utils.notes.list.cancel()
-      const previous = utils.notes.list.getData({ sortBy })
-      utils.notes.list.setData({ sortBy }, (old) =>
-        old?.map((n) => n.id === input.id ? { ...n, pinned: input.pinned } : n)
-      )
+      const previous = utils.notes.list.getInfiniteData({ sortBy })
+      utils.notes.list.setInfiniteData({}, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            items: page.items.map((n) => n.id === input.id ? { ...n, pinned: input.pinned } : n),
+          })),
+        }
+      })
       return { previous }
     },
     onError: (_e, input, ctx) => {
-      utils.notes.list.setData({ sortBy }, ctx?.previous)
+      utils.notes.list.setInfiniteData({ sortBy }, ctx?.previous)
       showToast(input.pinned ? 'An error occurred when pinning the note' : 'An error occurred when unpinning the note')
     },
     onSuccess: (data) => {
@@ -139,16 +157,23 @@ export function NotesList() {
 
   const handleDelete = async (note: Note) => {
     await utils.notes.list.cancel()
-    const previous = utils.notes.list.getData({ sortBy })
-    utils.notes.list.setData(undefined, (old) =>
-      old?.filter((n) => n.id !== note.id)
-    )
+    const previous = utils.notes.list.getInfiniteData({ sortBy })
+    utils.notes.list.setInfiniteData({}, (old) => {
+      if (!old) return old
+      return {
+        ...old,
+        pages: old.pages.map((page) => ({
+          ...page,
+          items: page.items.filter((n) => n.id !== note.id),
+        })),
+      }
+    })
     showToast('Note deleted', () => {
       const timeout = pendingDeletes.current.get(note.id)
       if (timeout) {
         clearTimeout(timeout)
       }
-      utils.notes.list.setData(undefined, previous)
+      utils.notes.list.setInfiniteData(undefined, previous)
       pendingDeletes.current.delete(note.id)
     })
     const deleteTimeout = setTimeout(() => {
@@ -328,6 +353,17 @@ export function NotesList() {
           </li>
         ))}
       </ul>
+      {hasNextPage && (
+        <div className="text-center mt-8">
+          <button
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? 'Loading...' : 'Load more'}
+          </button>
+        </div>
+      )}
     </>
   )
 }

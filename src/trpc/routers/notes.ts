@@ -2,7 +2,6 @@ import { TRPCError } from '@trpc/server'
 import { and, asc, desc, eq, inArray, lt, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
-import { generateNoteSummary } from '@/lib/ai/summary'
 import { db, sqlite } from '@/lib/db'
 import { deleteFts, upsertFts } from '@/lib/db/fts'
 import { notes, noteTags, tags } from '@/lib/db/schema'
@@ -196,33 +195,6 @@ export const notesRouter = createTRPCRouter({
         db.delete(notes).where(eq(notes.id, input.id)).run()
       })()
       return { success: true }
-    }),
-
-  summarize: baseProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      const result = await db
-        .select()
-        .from(notes)
-        .where(eq(notes.id, input.id))
-      const note = result[0] ?? null
-      if (!note) {
-        throw new TRPCError({ code: 'NOT_FOUND' })
-      }
-
-      const summary = await generateNoteSummary(note.title, note.body)
-      const now = new Date().toISOString()
-      const [updated] = db
-        .update(notes)
-        .set({
-          summary,
-          summarizedAt: now,
-          updatedAt: now, // forced here to make both dates the same (avoiding $onUpdate)
-        })
-        .where(eq(notes.id, input.id))
-        .returning()
-        .all()
-      return updated
     }),
 
   pin: baseProcedure

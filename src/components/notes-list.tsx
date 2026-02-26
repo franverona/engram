@@ -89,6 +89,7 @@ export function NotesList() {
   const [summarizingIds, setSummarizingIds] = useState<Set<number>>(new Set())
   const [pinningIds, setPinningIds] = useState<Set<number>>(new Set())
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [streamingSummaries, setStreamingSummaries] = useState<Map<number, string>>(new Map())
 
   const deleteNote = trpc.notes.delete.useMutation({
     onError: () => {
@@ -98,26 +99,6 @@ export function NotesList() {
     onSettled: (_d, _e, input) => {
       utils.notes.list.invalidate()
       pendingDeletes.current.delete(input.id)
-    },
-  })
-
-  const summarizeNote = trpc.notes.summarize.useMutation({
-    onMutate: (input) => {
-      setSummarizingIds(prev => new Set(prev).add(input.id))
-    },
-    onError: () => {
-      showToast('An error occurred when generating the summary')
-    },
-    onSuccess: () => {
-      showToast('Summary created successfully')
-    },
-    onSettled: (_note, _err, variables) => {
-      utils.notes.list.invalidate()
-      setSummarizingIds(prev => {
-        const next = new Set(prev)
-        next.delete(variables.id)
-        return next
-      })
     },
   })
 
@@ -180,6 +161,34 @@ export function NotesList() {
       deleteNote.mutate({ id: note.id })
     }, 5000)
     pendingDeletes.current.set(note.id, deleteTimeout)
+  }
+
+  const streamSummary = async (noteId: number) => {
+    setSummarizingIds(prev => new Set(prev).add(noteId))
+    setStreamingSummaries(prev => new Map(prev).set(noteId, ''))
+    try {
+      const res = await fetch(`/api/summarize/${noteId}`)
+      if (!res.ok || !res.body) throw new Error()
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value)
+        setStreamingSummaries(prev => {
+          const next = new Map(prev)
+          next.set(noteId, (next.get(noteId) ?? '') + chunk)
+          return next
+        })
+      }
+      utils.notes.list.invalidate()
+      showToast('Summary created successfully')
+    } catch {
+      showToast('An error occurred when generating the summary')
+    } finally {
+      setSummarizingIds(prev => { const next = new Set(prev); next.delete(noteId); return next })
+      setStreamingSummaries(prev => { const next = new Map(prev); next.delete(noteId); return next })
+    }
   }
 
   if (isLoading) {
@@ -294,7 +303,7 @@ export function NotesList() {
                     <ExportButton note={note} />
                     <SummarizeButton
                       exists={!!note.summary}
-                      onClick={() => summarizeNote.mutate({ id: note.id })}
+                      onClick={async () => await streamSummary(note.id)}
                       isPending={summarizingIds.has(note.id)}
                     />
                     <EditButton href={`/notes/${note.id}/edit`} />
@@ -304,11 +313,10 @@ export function NotesList() {
                   </div>
                 </div>
                 <div className="mt-2 line-clamp-4 text-sm text-text-muted">
-                  {summarizingIds.has(note.id) ? (
-                    <Spinner />
-                  ) : (
-                    <>{note.summary || stripMarkdown(note.body)}</>
-                  )}
+                  {summarizingIds.has(note.id)
+                    ? <>{streamingSummaries.get(note.id) || <Spinner />}</>
+                    : <>{note.summary || stripMarkdown(note.body)}</>
+                  }
                 </div>
                 {note.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">

@@ -41,14 +41,21 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
   const updateNote = trpc.notes.update.useMutation({
     onMutate: async (input) => {
       await utils.notes.list.cancel()
-      const previous = utils.notes.list.getData()
-      utils.notes.list.setData(undefined, (old) =>
-        old?.map((n) => (n.id === input.id ? { ...n, ...input } : n))
-      )
+      const previous = utils.notes.list.getInfiniteData()
+      utils.notes.list.setInfiniteData({}, (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            items: page.items.map((n) => (n.id === input.id ? { ...n, ...input } : n))
+          })),
+        }
+      })
       return { previous }
     },
     onError: (_err, _input, ctx) => {
-      utils.notes.list.setData(undefined, ctx?.previous)
+      utils.notes.list.setInfiniteData(undefined, ctx?.previous)
     },
     onSuccess: () => {
       showToast('Note updated successfully')
@@ -60,28 +67,8 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
   })
 
   const createNote = trpc.notes.create.useMutation({
-    onMutate: async (input) => {
-      await utils.notes.list.cancel()
-      const previous = utils.notes.list.getData()
-      const tempId = -Date.now()
-      const tempDate = new Date().toISOString()
-      utils.notes.list.setData(undefined, (old) => [
-        ...(old ?? []),
-        {
-          id: tempId,
-          ...input,
-          pinned: false,
-          summary: null,
-          summarizedAt: null,
-          tags: input.tags ?? [],
-          createdAt: tempDate,
-          updatedAt: tempDate,
-        }
-      ])
-      return { previous }
-    },
-    onError: (_err, _input, ctx) => {
-      utils.notes.list.setData(undefined, ctx?.previous)
+    onError: () => {
+      showToast('Failed to create note')
     },
     onSuccess: () => {
       showToast('Note created successfully')

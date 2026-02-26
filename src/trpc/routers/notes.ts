@@ -68,6 +68,35 @@ export const notesRouter = createTRPCRouter({
       return { items: itemsWithTags, nextCursor }
     }),
 
+  listAll: baseProcedure
+    .query(async () => {
+      const rows = await db.select().from(notes).orderBy(desc(notes.createdAt))
+      if (rows.length === 0) {
+        return []
+      }
+
+      const noteIds = rows.map((n) => n.id)
+      const noteTagsResults = await db.select({
+        noteId: noteTags.noteId,
+        name: tags.name,
+      })
+        .from(noteTags)
+        .innerJoin(tags, eq(noteTags.tagId, tags.id))
+        .where(inArray(noteTags.noteId, noteIds))
+
+      const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
+        const existing = acc.get(row.noteId) ?? []
+        acc.set(row.noteId, [...existing, row.name])
+        return acc
+      }, new Map<number, string[]>())
+      const itemsWithTags = rows.map((note) => ({
+        ...note,
+        tags: tagsByNoteId.get(note.id) ?? [],
+      }))
+
+      return itemsWithTags
+    }),
+
   getById: baseProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {

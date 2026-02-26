@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useToast } from '@/components/toast'
+import type { notes } from '@/lib/db/schema'
 import { trpc } from '@/trpc/react'
 import { DeleteButton, EditButton, ExportButton, PinButton, SummarizeButton } from './action-buttons'
 import { Spinner } from './ui'
@@ -61,6 +62,8 @@ const isSummaryStale = (updatedAt: string, summarizedAt: string) => updatedAt > 
 
 type SortByFields = 'createdAt' | 'updatedAt' | 'title'
 
+type Note = typeof notes.$inferSelect
+
 export function NotesList() {
   const [sortBy, setSortBy] = useState<SortByFields>('updatedAt')
   const { data: notesList, isLoading } = trpc.notes.list.useQuery({
@@ -70,27 +73,20 @@ export function NotesList() {
   const utils = trpc.useUtils()
   const { showToast } = useToast()
 
+  const pendingDeletes = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map())
+
   const [summarizingIds, setSummarizingIds] = useState<Set<number>>(new Set())
   const [pinningIds, setPinningIds] = useState<Set<number>>(new Set())
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const deleteNote = trpc.notes.delete.useMutation({
-    onMutate: async (input) => {
-      await utils.notes.list.cancel()
-      const previous = utils.notes.list.getData({ sortBy })
-      utils.notes.list.setData(undefined, (old) =>
-        old?.filter((n) => n.id !== input.id)
-      )
-      return { previous }
-    },
-    onError: (_err, _input, ctx) => {
-      utils.notes.list.setData(undefined, ctx?.previous)
-    },
-    onSuccess: () => {
-      showToast('Note deleted successfully')
-    },
-    onSettled: () => {
+    onError: () => {
       utils.notes.list.invalidate()
+      showToast('Failed to delete note')
+    },
+    onSettled: (_d, _e, input) => {
+      utils.notes.list.invalidate()
+      pendingDeletes.current.delete(input.id)
     },
   })
 
@@ -140,6 +136,26 @@ export function NotesList() {
       })
     },
   })
+
+  const handleDelete = async (note: Note) => {
+    await utils.notes.list.cancel()
+    const previous = utils.notes.list.getData({ sortBy })
+    utils.notes.list.setData(undefined, (old) =>
+      old?.filter((n) => n.id !== note.id)
+    )
+    showToast('Note deleted', () => {
+      const timeout = pendingDeletes.current.get(note.id)
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+      utils.notes.list.setData(undefined, previous)
+      pendingDeletes.current.delete(note.id)
+    })
+    const deleteTimeout = setTimeout(() => {
+      deleteNote.mutate({ id: note.id })
+    }, 5000)
+    pendingDeletes.current.set(note.id, deleteTimeout)
+  }
 
   if (isLoading) {
     return (
@@ -258,8 +274,7 @@ export function NotesList() {
                     />
                     <EditButton href={`/notes/${note.id}/edit`} />
                     <DeleteButton
-                      onConfirm={() => deleteNote.mutate({ id: note.id })}
-                      isPending={deleteNote.isPending}
+                      onConfirm={async () => await handleDelete(note)}
                     />
                   </div>
                 </div>

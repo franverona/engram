@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { asc, desc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, lt, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { generateNoteEmbedding } from '@/lib/ai/embeddings'
 import { generateNoteSummary } from '@/lib/ai/summary'
@@ -11,20 +11,42 @@ import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
   list: baseProcedure
-    .input(z.object({ sortBy: z.enum(['createdAt', 'updatedAt', 'title']).optional() }).optional())
+    .input(z.object({
+      cursor: z.object({
+        pinned: z.number().int(),
+        id: z.number(),
+      }).optional(),
+      limit: z.number().min(1).max(100).optional().default(20),
+      sortBy: z.enum(['createdAt', 'updatedAt', 'title']).optional(),
+    }).optional())
     .query(async ({ input }) => {
+      const limit = input?.limit ?? 20
+      const cursor = input?.cursor
+
       const secondarySort = input?.sortBy === 'title'
         ? asc(notes.title)
         : desc(notes[input?.sortBy ?? 'createdAt'])
-      const notesList = await db
+      const rows = await db
         .select()
         .from(notes)
-        .orderBy(desc(notes.pinned), secondarySort)
-      if (notesList.length === 0) {
-        return []
+        .where(cursor ? or(
+          sql`${notes.pinned} < ${cursor.pinned}`,
+          and(sql`${notes.pinned} = ${cursor.pinned}`, lt(notes.id, cursor.id))
+        ) : undefined)
+        .orderBy(desc(notes.pinned), secondarySort, desc(notes.id))
+        .limit(limit + 1)  // fetch one extra to detect next page
+      if (rows.length === 0) {
+        return { items: [], nextCursor: undefined }
       }
 
-      const noteIds = notesList.map((n) => n.id)
+      const hasMore = rows.length > limit
+      const items = hasMore ? rows.slice(0, limit) : rows
+      const lastItem = items[items.length - 1]
+      const nextCursor = hasMore
+        ? { pinned: lastItem.pinned ? 1 : 0, id: lastItem.id }
+        : undefined
+
+      const noteIds = items.map((n) => n.id)
       const noteTagsResults = await db.select({
         noteId: noteTags.noteId,
         name: tags.name,
@@ -38,11 +60,41 @@ export const notesRouter = createTRPCRouter({
         acc.set(row.noteId, [...existing, row.name])
         return acc
       }, new Map<number, string[]>())
-
-      return notesList.map((note) => ({
+      const itemsWithTags = items.map((note) => ({
         ...note,
         tags: tagsByNoteId.get(note.id) ?? [],
       }))
+
+      return { items: itemsWithTags, nextCursor }
+    }),
+
+  listAll: baseProcedure
+    .query(async () => {
+      const rows = await db.select().from(notes).orderBy(desc(notes.createdAt))
+      if (rows.length === 0) {
+        return []
+      }
+
+      const noteIds = rows.map((n) => n.id)
+      const noteTagsResults = await db.select({
+        noteId: noteTags.noteId,
+        name: tags.name,
+      })
+        .from(noteTags)
+        .innerJoin(tags, eq(noteTags.tagId, tags.id))
+        .where(inArray(noteTags.noteId, noteIds))
+
+      const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
+        const existing = acc.get(row.noteId) ?? []
+        acc.set(row.noteId, [...existing, row.name])
+        return acc
+      }, new Map<number, string[]>())
+      const itemsWithTags = rows.map((note) => ({
+        ...note,
+        tags: tagsByNoteId.get(note.id) ?? [],
+      }))
+
+      return itemsWithTags
     }),
 
   getById: baseProcedure

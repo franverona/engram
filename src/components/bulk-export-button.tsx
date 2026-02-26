@@ -1,31 +1,41 @@
 'use client'
 
 import JSZip from 'jszip'
+import { useState } from 'react'
 import { downloadFile, slugify } from '@/lib/export'
 import { trpc } from '@/trpc/react'
 
 export default function BulkExportButton() {
-  const { data: notesList, isLoading } = trpc.notes.list.useQuery()
-  const onClick = async () => {
-    if (!notesList || notesList.length === 0) {
-      return
-    }
+  const utils = trpc.useUtils()
+  const [isExporting, setIsExporting] = useState(false)
 
-    const zip = new JSZip()
-    for (const note of notesList) {
-      const file = {
-        name: `${slugify(note.title)}-${note.id}.md`,
-        content: `# ${note.title}\n\n${note.body}`
+  const onClick = async () => {
+    setIsExporting(true)
+    try {
+      const allNotes = await utils.notes.listAll.fetch()
+
+      if (allNotes.length === 0) {
+        return
       }
-      zip.file(file.name, file.content)
+
+      const zip = new JSZip()
+      for (const note of allNotes) {
+        const file = {
+          name: `${slugify(note.title)}-${note.id}.md`,
+          content: `# ${note.title}\n\n${note.body}`
+        }
+        zip.file(file.name, file.content)
+      }
+      const blob = await zip.generateAsync({ type: 'blob' })
+      downloadFile(`engram-export-${new Date().valueOf()}.zip`, blob, 'application/zip')
+    } finally {
+      setIsExporting(false)
     }
-    const blob = await zip.generateAsync({ type: 'blob' })
-    downloadFile(`engram-export-${new Date().valueOf()}.zip`, blob, 'application/zip')
   }
 
   return (
     <button
-      disabled={isLoading || notesList?.length === 0}
+      disabled={isExporting}
       onClick={onClick}
       className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
       aria-label="Export all notes"

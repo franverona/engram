@@ -35,7 +35,7 @@
     "server-only": "^0.0.1",
     "sqlite-vec": "^0.1.7-alpha.2",
     "superjson": "^2.2.6",
-    "zod": "^3.25.76",
+    "zod": "^4.3.6",
     "zx": "^8.8.5"
   },
   "devDependencies": {

@@ -74,7 +74,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: chatModel,
     system: systemMessage,
-    messages: convertToModelMessages(messages),
+    messages: await convertToModelMessages(messages),
     onFinish: async (event) => {
       if (textContent) {
         await db.insert(chatMessages).values({

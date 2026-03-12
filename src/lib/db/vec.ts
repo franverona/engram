@@ -11,15 +11,14 @@ export function initVecTable(db: Database.Database) {
   `)
 }
 
-export function upsertEmbedding(
-  db: Database.Database,
-  noteId: number,
-  embedding: Float32Array,
-) {
+export function upsertEmbedding(db: Database.Database, noteId: number, embedding: Float32Array) {
   const buf = Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength)
   db.transaction(() => {
     db.prepare('DELETE FROM note_embeddings WHERE note_id = ?').run(BigInt(noteId))
-    db.prepare('INSERT INTO note_embeddings (note_id, embedding) VALUES (?, ?)').run(BigInt(noteId), buf)
+    db.prepare('INSERT INTO note_embeddings (note_id, embedding) VALUES (?, ?)').run(
+      BigInt(noteId),
+      buf,
+    )
   })()
 }
 
@@ -27,7 +26,7 @@ export function searchEmbeddings(
   db: Database.Database,
   queryEmbedding: Float32Array,
   limit = 5,
-): { note_id: number, distance: number }[] {
+): { note_id: number; distance: number }[] {
   return db
     .prepare(
       `SELECT note_id, distance
@@ -49,7 +48,7 @@ export function deleteEmbedding(db: Database.Database, noteId: number) {
 export function getEmbeddingsByIds(
   db: Database.Database,
   noteIds: number[],
-): { note_id: number, embedding: Buffer }[] {
+): { note_id: number; embedding: Buffer }[] {
   if (noteIds.length === 0) {
     return []
   }
@@ -57,5 +56,5 @@ export function getEmbeddingsByIds(
   const placeholders = noteIds.map(() => '?').join(', ')
   return db
     .prepare(`SELECT note_id, embedding FROM note_embeddings WHERE note_id IN (${placeholders})`)
-    .all(...noteIds.map((id) => BigInt(id))) as { note_id: number, embedding: Buffer }[]
+    .all(...noteIds.map((id) => BigInt(id))) as { note_id: number; embedding: Buffer }[]
 }

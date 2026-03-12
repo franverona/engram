@@ -29,12 +29,12 @@ describe('generateNoteSummary', () => {
     expect(mockGenerateText).toHaveBeenCalledWith(
       expect.objectContaining({
         prompt: expect.stringContaining('My Note'),
-      })
+      }),
     )
     expect(mockGenerateText).toHaveBeenCalledWith(
       expect.objectContaining({
         prompt: expect.stringContaining('Some body content.'),
-      })
+      }),
     )
   })
 

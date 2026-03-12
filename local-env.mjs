@@ -9,7 +9,7 @@ async function loadEnvFile(filename) {
     const envPath = resolve(process.cwd(), filename)
     const content = await readFile(envPath, 'utf-8')
 
-    content.split('\n').forEach(line => {
+    content.split('\n').forEach((line) => {
       // Skip comments and empty lines
       if (line.trim() === '' || line.trim().startsWith('#')) return
 
@@ -43,7 +43,8 @@ async function spawnTab(command) {
 
 // Helper function to split pane horizontally (right)
 async function splitRight(parentPaneId, command) {
-  const result = await $`wezterm cli split-pane --pane-id ${parentPaneId} --right --cwd ${process.cwd()}`
+  const result =
+    await $`wezterm cli split-pane --pane-id ${parentPaneId} --right --cwd ${process.cwd()}`
   const newPaneId = result.stdout.trim()
 
   await sleep(200)

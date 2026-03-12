@@ -24,31 +24,28 @@ export const chatsRouter = createTRPCRouter({
         .update(chats)
         .set({ title: input.title })
         .where(eq(chats.id, input.id))
-        .returning().all()
+        .returning()
+        .all()
       return updated
     }),
 
-  delete: baseProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      db.delete(chats).where(eq(chats.id, input.id)).run()
-      return { success: true }
-    }),
+  delete: baseProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    db.delete(chats).where(eq(chats.id, input.id)).run()
+    return { success: true }
+  }),
 
-  getMessages: baseProcedure
-    .input(z.object({ chatId: z.number() }))
-    .query(({ input }) => {
-      return db
-        .select()
-        .from(chatMessages)
-        .where(eq(chatMessages.chatId, input.chatId))
-        .orderBy(asc(chatMessages.createdAt))
-    }),
+  getMessages: baseProcedure.input(z.object({ chatId: z.number() })).query(({ input }) => {
+    return db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.chatId, input.chatId))
+      .orderBy(asc(chatMessages.createdAt))
+  }),
 
   generateTitle: baseProcedure
     .input(z.object({ message: z.string().min(1) }))
     .mutation(async ({ input }) => {
       const title = await generateChatMessageSummary(input.message.trim())
       return title.replace(/[".]/g, '').trim()
-    })
+    }),
 })

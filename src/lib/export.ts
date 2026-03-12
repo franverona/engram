@@ -9,5 +9,8 @@ export function downloadFile(filename: string, content: string | Blob, mimeType 
 }
 
 export function slugify(title: string) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }

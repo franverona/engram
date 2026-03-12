@@ -5,24 +5,30 @@ import { useRef, useState } from 'react'
 import { useToast } from '@/components/toast'
 import type { notes } from '@/lib/db/schema'
 import { trpc } from '@/trpc/react'
-import { DeleteButton, EditButton, ExportButton, PinButton, SummarizeButton } from './action-buttons'
+import {
+  DeleteButton,
+  EditButton,
+  ExportButton,
+  PinButton,
+  SummarizeButton,
+} from './action-buttons'
 import { Spinner } from './ui'
 
 function stripMarkdown(text: string): string {
   return text
-    .replace(/^```[\s\S]*?^```/gm, '')        // fenced code blocks (multi-line)
+    .replace(/^```[\s\S]*?^```/gm, '') // fenced code blocks (multi-line)
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1') // images → alt text
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')  // links → label
-    .replace(/^#{1,6}\s+/gm, '')              // headings
-    .replace(/(\*\*|__)(.*?)\1/g, '$2')       // bold
-    .replace(/([*_])(.*?)\1/g, '$2')          // italic
-    .replace(/~~(.*?)~~/g, '$1')              // strikethrough
-    .replace(/`[^`]*`/g, '')                  // inline code
-    .replace(/^>\s+/gm, '')                   // blockquotes
-    .replace(/^[-*+]\s+/gm, '')               // unordered list markers
-    .replace(/^\d+\.\s+/gm, '')               // ordered list markers
-    .replace(/^-{3,}$/gm, '')                 // horizontal rules
-    .replace(/\n{2,}/g, ' ')                  // collapse blank lines
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links → label
+    .replace(/^#{1,6}\s+/gm, '') // headings
+    .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
+    .replace(/([*_])(.*?)\1/g, '$2') // italic
+    .replace(/~~(.*?)~~/g, '$1') // strikethrough
+    .replace(/`[^`]*`/g, '') // inline code
+    .replace(/^>\s+/gm, '') // blockquotes
+    .replace(/^[-*+]\s+/gm, '') // unordered list markers
+    .replace(/^\d+\.\s+/gm, '') // ordered list markers
+    .replace(/^-{3,}$/gm, '') // horizontal rules
+    .replace(/\n{2,}/g, ' ') // collapse blank lines
     .trim()
 }
 
@@ -66,18 +72,13 @@ type Note = typeof notes.$inferSelect
 
 export function NotesList() {
   const [sortBy, setSortBy] = useState<SortByFields>('updatedAt')
-  const {
-    data,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = trpc.notes.list.useInfiniteQuery(
-    { sortBy },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor
-    }
-  )
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    trpc.notes.list.useInfiniteQuery(
+      { sortBy },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    )
   const notesList = data?.pages.flatMap((page) => page.items) ?? []
 
   const { data: allTags } = trpc.tags.list.useQuery()
@@ -104,7 +105,7 @@ export function NotesList() {
 
   const pinNote = trpc.notes.pin.useMutation({
     onMutate: async (input) => {
-      setPinningIds(prev => new Set(prev).add(input.id))
+      setPinningIds((prev) => new Set(prev).add(input.id))
       await utils.notes.list.cancel()
       const previous = utils.notes.list.getInfiniteData({ sortBy })
       utils.notes.list.setInfiniteData({}, (old) => {
@@ -113,7 +114,7 @@ export function NotesList() {
           ...old,
           pages: old.pages.map((page) => ({
             ...page,
-            items: page.items.map((n) => n.id === input.id ? { ...n, pinned: input.pinned } : n),
+            items: page.items.map((n) => (n.id === input.id ? { ...n, pinned: input.pinned } : n)),
           })),
         }
       })
@@ -121,14 +122,18 @@ export function NotesList() {
     },
     onError: (_e, input, ctx) => {
       utils.notes.list.setInfiniteData({ sortBy }, ctx?.previous)
-      showToast(input.pinned ? 'An error occurred when pinning the note' : 'An error occurred when unpinning the note')
+      showToast(
+        input.pinned
+          ? 'An error occurred when pinning the note'
+          : 'An error occurred when unpinning the note',
+      )
     },
     onSuccess: (data) => {
       showToast(data.pinned ? 'Note pinned' : 'Note unpinned')
     },
     onSettled: (_note, _err, variables) => {
       utils.notes.list.invalidate()
-      setPinningIds(prev => {
+      setPinningIds((prev) => {
         const next = new Set(prev)
         next.delete(variables.id)
         return next
@@ -164,8 +169,8 @@ export function NotesList() {
   }
 
   const streamSummary = async (noteId: number) => {
-    setSummarizingIds(prev => new Set(prev).add(noteId))
-    setStreamingSummaries(prev => new Map(prev).set(noteId, ''))
+    setSummarizingIds((prev) => new Set(prev).add(noteId))
+    setStreamingSummaries((prev) => new Map(prev).set(noteId, ''))
     try {
       const res = await fetch(`/api/summarize/${noteId}`)
       if (!res.ok || !res.body) throw new Error()
@@ -175,7 +180,7 @@ export function NotesList() {
         const { done, value } = await reader.read()
         if (done) break
         const chunk = decoder.decode(value)
-        setStreamingSummaries(prev => {
+        setStreamingSummaries((prev) => {
           const next = new Map(prev)
           next.set(noteId, (next.get(noteId) ?? '') + chunk)
           return next
@@ -186,8 +191,16 @@ export function NotesList() {
     } catch {
       showToast('An error occurred when generating the summary')
     } finally {
-      setSummarizingIds(prev => { const next = new Set(prev); next.delete(noteId); return next })
-      setStreamingSummaries(prev => { const next = new Map(prev); next.delete(noteId); return next })
+      setSummarizingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(noteId)
+        return next
+      })
+      setStreamingSummaries((prev) => {
+        const next = new Map(prev)
+        next.delete(noteId)
+        return next
+      })
     }
   }
 
@@ -204,7 +217,17 @@ export function NotesList() {
   if (!notesList?.length) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-text-faint">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mb-4 text-text-faint"
+        >
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
           <polyline points="14 2 14 8 20 8" />
           <line x1="12" y1="18" x2="12" y2="12" />
@@ -216,7 +239,16 @@ export function NotesList() {
           href="/notes/new"
           className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
@@ -226,13 +258,14 @@ export function NotesList() {
     )
   }
 
-  const filtered = selectedTags.length === 0
-    ? notesList
-    : notesList.filter((note) => selectedTags.every((t) => note.tags.includes(t)))
+  const filtered =
+    selectedTags.length === 0
+      ? notesList
+      : notesList.filter((note) => selectedTags.every((t) => note.tags.includes(t)))
 
   const toggleTag = (name: string) =>
     setSelectedTags((prev) =>
-      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name],
     )
 
   return (
@@ -242,7 +275,12 @@ export function NotesList() {
           <label htmlFor="sortBy" className="block text-sm font-medium">
             Sort by:
           </label>
-          <select id="sortBy" className="rounded-lg border border-border bg-surface px-3.5 py-2 text-sm shadow-sm" value={sortBy} onChange={(e) => setSortBy(e.target.value as SortByFields)}>
+          <select
+            id="sortBy"
+            className="rounded-lg border border-border bg-surface px-3.5 py-2 text-sm shadow-sm"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortByFields)}
+          >
             <option value="updatedAt">Update date</option>
             <option value="createdAt">Create date</option>
             <option value="title">Title</option>
@@ -279,20 +317,31 @@ export function NotesList() {
             <div className="flex flex-col items-start justify-between gap-4">
               <div className="min-w-0 w-full">
                 <div className="flex items-center justify-between gap-4">
-                  <Link href={`/notes/${note.id}`} className="inline-flex gap-2 flex-1 font-semibold leading-snug hover:text-primary truncate">
+                  <Link
+                    href={`/notes/${note.id}`}
+                    className="inline-flex gap-2 flex-1 font-semibold leading-snug hover:text-primary truncate"
+                  >
                     {note.pinned && (
                       <span className="text-yellow-300 pt-0.5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2"
-                          strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <line x1="12" x2="12" y1="17" y2="22" fill="none" />
-                          <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
-  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+                          <path
+                            d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0
+  4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"
+                          />
                         </svg>
                       </span>
                     )}
-                    <span className="truncate">
-                      {note.title}
-                    </span>
+                    <span className="truncate">{note.title}</span>
                   </Link>
                   <div className="flex gap-2 items-center shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
                     <PinButton
@@ -307,21 +356,23 @@ export function NotesList() {
                       isPending={summarizingIds.has(note.id)}
                     />
                     <EditButton href={`/notes/${note.id}/edit`} />
-                    <DeleteButton
-                      onConfirm={async () => await handleDelete(note)}
-                    />
+                    <DeleteButton onConfirm={async () => await handleDelete(note)} />
                   </div>
                 </div>
                 <div className="mt-2 line-clamp-4 text-sm text-text-muted">
-                  {summarizingIds.has(note.id)
-                    ? <>{streamingSummaries.get(note.id) || <Spinner />}</>
-                    : <>{note.summary || stripMarkdown(note.body)}</>
-                  }
+                  {summarizingIds.has(note.id) ? (
+                    <>{streamingSummaries.get(note.id) || <Spinner />}</>
+                  ) : (
+                    <>{note.summary || stripMarkdown(note.body)}</>
+                  )}
                 </div>
                 {note.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {note.tags.map((tag) => (
-                      <span key={tag} className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium">
+                      <span
+                        key={tag}
+                        className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -335,11 +386,19 @@ export function NotesList() {
                         <>
                           <div className="text-xs text-text-faint">·</div>
                           <div className="flex gap-2 items-center text-xs rounded-sm px-2 py-1 font-medium bg-amber-300 text-amber-900">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                              strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                              <line x1="12" y1="9" x2="12" y2="13"/>
-                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                              <line x1="12" y1="9" x2="12" y2="13" />
+                              <line x1="12" y1="17" x2="12.01" y2="17" />
                             </svg>
                             <span>Summary may be outdated</span>
                           </div>

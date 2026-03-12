@@ -72,9 +72,9 @@ describe('mmr', () => {
     //              → note 3 wins.
     const query = new Float32Array([1, 0])
     const candidates = [
-      { note_id: 1, embedding: new Float32Array([1, 0]) },          // most relevant
-      { note_id: 2, embedding: new Float32Array([0.99, 0.14]) },    // very similar to note 1
-      { note_id: 3, embedding: new Float32Array([0, 1]) },          // orthogonal to note 1
+      { note_id: 1, embedding: new Float32Array([1, 0]) }, // most relevant
+      { note_id: 2, embedding: new Float32Array([0.99, 0.14]) }, // very similar to note 1
+      { note_id: 3, embedding: new Float32Array([0, 1]) }, // orthogonal to note 1
     ]
     const result = mmr(query, candidates, 2, 0.0)
     expect(result).toHaveLength(2)

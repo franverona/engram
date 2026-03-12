@@ -64,7 +64,9 @@ function insertNote(title, body, tagNames = []) {
   }
 
   sqlite.prepare('DELETE FROM note_fts WHERE rowid = ?').run(note.id)
-  sqlite.prepare('INSERT INTO note_fts (rowid, title, body) VALUES (?, ?, ?)').run(note.id, title, body)
+  sqlite
+    .prepare('INSERT INTO note_fts (rowid, title, body) VALUES (?, ?, ?)')
+    .run(note.id, title, body)
 
   return note.id
 }
@@ -72,7 +74,9 @@ function insertNote(title, body, tagNames = []) {
 function insertEmbedding(noteId, embedding) {
   const buf = Buffer.from(embedding.buffer, embedding.byteOffset, embedding.byteLength)
   sqlite.prepare('DELETE FROM note_embeddings WHERE note_id = ?').run(BigInt(noteId))
-  sqlite.prepare('INSERT INTO note_embeddings (note_id, embedding) VALUES (?, ?)').run(BigInt(noteId), buf)
+  sqlite
+    .prepare('INSERT INTO note_embeddings (note_id, embedding) VALUES (?, ?)')
+    .run(BigInt(noteId), buf)
 }
 
 // ---------------------------------------------------------------------------

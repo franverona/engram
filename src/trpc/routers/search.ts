@@ -19,14 +19,9 @@ export const searchRouter = createTRPCRouter({
       if (results.length === 0) return []
 
       const noteIds = results.map((r) => r.note_id)
-      const matchedNotes = await db
-        .select()
-        .from(notes)
-        .where(inArray(notes.id, noteIds))
+      const matchedNotes = await db.select().from(notes).where(inArray(notes.id, noteIds))
 
-      const distanceMap = new Map(
-        results.map((r) => [r.note_id, r.distance]),
-      )
+      const distanceMap = new Map(results.map((r) => [r.note_id, r.distance]))
 
       return matchedNotes
         .map((note) => ({
@@ -65,10 +60,7 @@ export const searchRouter = createTRPCRouter({
         return []
       }
 
-      const matchedNotes = await db
-        .select()
-        .from(notes)
-        .where(inArray(notes.id, noteIds))
+      const matchedNotes = await db.select().from(notes).where(inArray(notes.id, noteIds))
 
       return matchedNotes
         .map((note) => ({

@@ -3,9 +3,5 @@ export default function LayoutInnerContent({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <div className="px-4 pt-6 pb-16">
-      {children}
-    </div>
-  )
+  return <div className="px-4 pt-6 pb-16">{children}</div>
 }

@@ -9,11 +9,14 @@ export default meta
 
 type Story = StoryObj<typeof ErrorBoundary>
 
-const ThrowError = () => {throw new Error('Some error')}
+const ThrowError = () => {
+  throw new Error('Some error')
+}
 
 const Fallback = () => (
   <div>
-    Something happened <button className="rounded-sm border border-gray-700 px-2 py-0.5 text-sm">Retry</button>
+    Something happened{' '}
+    <button className="rounded-sm border border-gray-700 px-2 py-0.5 text-sm">Retry</button>
   </div>
 )
 
@@ -22,7 +25,7 @@ export const WithError: Story = {
     <ErrorBoundary>
       <ThrowError />
     </ErrorBoundary>
-  )
+  ),
 }
 
 export const CustomFallback: Story = {
@@ -30,5 +33,5 @@ export const CustomFallback: Story = {
     <ErrorBoundary fallback={<Fallback />}>
       <ThrowError />
     </ErrorBoundary>
-  )
+  ),
 }

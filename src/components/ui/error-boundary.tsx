@@ -3,8 +3,8 @@
 import { Component } from 'react'
 import type { ReactNode } from 'react'
 
-type Props = { children: ReactNode, fallback?: ReactNode }
-type State = { hasError: boolean, error?: Error }
+type Props = { children: ReactNode; fallback?: ReactNode }
+type State = { hasError: boolean; error?: Error }
 
 function DefaultFallback({ onReset }: { onReset: () => void }) {
   return (
@@ -36,7 +36,11 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? <DefaultFallback onReset={() => this.setState({ hasError: false })} />
+      return (
+        this.props.fallback ?? (
+          <DefaultFallback onReset={() => this.setState({ hasError: false })} />
+        )
+      )
     }
     return this.props.children
   }

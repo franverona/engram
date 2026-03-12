@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: "chore"
+      prefix: 'chore'
       include: scope
 
   - package-ecosystem: github-actions
@@ -13,5 +13,5 @@ updates:
     schedule:
       interval: weekly
     commit-message:
-      prefix: "ci"
+      prefix: 'ci'
       include: scope

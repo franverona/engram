@@ -22,7 +22,7 @@ export default function BulkExportButton() {
       for (const note of allNotes) {
         const file = {
           name: `${slugify(note.title)}-${note.id}.md`,
-          content: `# ${note.title}\n\n${note.body}`
+          content: `# ${note.title}\n\n${note.body}`,
         }
         zip.file(file.name, file.content)
       }
@@ -41,8 +41,16 @@ export default function BulkExportButton() {
       aria-label="Export all notes"
       title="Export all notes"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M21 8V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" />
         <path d="M3 4h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
         <line x1="12" y1="12" x2="12" y2="16" />

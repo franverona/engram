@@ -1,10 +1,10 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 
-import stylistic from '@stylistic/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
+import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 
 const eslintConfig = defineConfig([
@@ -19,24 +19,7 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
   ]),
   {
-    plugins: {
-      '@stylistic': stylistic,
-    },
     rules: {
-      '@stylistic/semi': ['error', 'never'],
-      '@stylistic/quotes': ['error', 'single'],
-      '@stylistic/indent': ['error', 2],
-      '@stylistic/eol-last': ['error', 'always'],
-      '@stylistic/key-spacing': ['error', { beforeColon: false, afterColon: true }],
-      '@stylistic/comma-spacing': ['error', { before: false, after: true }],
-      '@stylistic/object-curly-spacing': ['error', 'always'],
-      '@stylistic/arrow-spacing': ['error', { before: true, after: true }],
-      '@stylistic/member-delimiter-style': ['error', { multiline: { delimiter: 'none' }, singleline: { delimiter: 'comma', requireLast: false } }],
-      '@stylistic/keyword-spacing': ['error', { before: true, after: true }],
-      '@stylistic/no-multi-spaces': ['error', { ignoreEOLComments: true }],
-      '@stylistic/space-infix-ops': 'error',
-      '@stylistic/type-annotation-spacing': 'error',
-      '@stylistic/space-before-function-paren': ['error', { anonymous: 'always', named: 'never', asyncArrow: 'always' }],
       'react/self-closing-comp': ['error', { component: true, html: true }],
       'no-restricted-syntax': [
         'error',
@@ -70,13 +53,11 @@ const eslintConfig = defineConfig([
       parser: tsParser,
     },
     rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports' },
-      ],
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
-  ...storybook.configs['flat/recommended']
+  ...storybook.configs['flat/recommended'],
+  prettier,
 ])
 
 export default eslintConfig

@@ -30,11 +30,17 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ id:
       </div>
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h1 className="text-2xl font-bold">{note.title}</h1>
-        <div className="mt-1.5 mb-4 text-xs text-text-faint">{readingTime.words} words · ~{readingTime.minutes} min read · {note.body.length} characters</div>
+        <div className="mt-1.5 mb-4 text-xs text-text-faint">
+          {readingTime.words} words · ~{readingTime.minutes} min read · {note.body.length}{' '}
+          characters
+        </div>
         {note.tags.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-1.5">
             {note.tags.map((tag) => (
-              <span key={tag} className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium">
+              <span
+                key={tag}
+                className="rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium"
+              >
                 {tag}
               </span>
             ))}

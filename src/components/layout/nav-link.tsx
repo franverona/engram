@@ -20,9 +20,7 @@ export function NavLink({
       href={href}
       onClick={onClick}
       className={`text-sm font-medium transition-colors ${
-        isActive
-          ? 'text-primary'
-          : 'text-text-muted hover:text-foreground'
+        isActive ? 'text-primary' : 'text-text-muted hover:text-foreground'
       }`}
     >
       {children}

@@ -9,12 +9,7 @@ export function initFtsTable(db: Database.Database) {
   `)
 }
 
-export function upsertFts(
-  db: Database.Database,
-  noteId: number,
-  title: string,
-  body: string,
-) {
+export function upsertFts(db: Database.Database, noteId: number, title: string, body: string) {
   db.prepare('DELETE FROM note_fts WHERE rowid = ?').run(noteId)
   db.prepare('INSERT INTO note_fts (rowid, title, body) VALUES (?, ?, ?)').run(noteId, title, body)
 }
@@ -27,11 +22,7 @@ export type SearchFtsResult = {
   note_id: number
   rank: number
 }
-export function searchFts(
-  db: Database.Database,
-  query: string,
-  limit = 5,
-): SearchFtsResult[] {
+export function searchFts(db: Database.Database, query: string, limit = 5): SearchFtsResult[] {
   return db
     .prepare(
       `SELECT
@@ -47,9 +38,6 @@ export function searchFts(
     .all(query, limit) as SearchFtsResult[]
 }
 
-export function deleteFts(
-  db: Database.Database,
-  noteId: number,
-) {
+export function deleteFts(db: Database.Database, noteId: number) {
   db.prepare('DELETE FROM note_fts WHERE rowid = ?').run(noteId)
 }

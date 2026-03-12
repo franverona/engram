@@ -68,13 +68,13 @@ npm run dev
 
 See `.env.example` for all available options. Defaults work out of the box if Ollama is running locally.
 
-| Variable | Default | Description |
-|---|---|---|
-| `OLLAMA_BASE_URL` | `http://localhost:11434/v1` | Ollama API endpoint |
-| `OLLAMA_CHAT_MODEL` | `llama3.1:8b` | Model used for RAG chat |
-| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Model used for embeddings |
-| `EMBEDDING_DIMENSION` | `768` | Vector dimension (must match embedding model) |
-| `DATABASE_PATH` | `./data/engram.db` | SQLite database file path |
+| Variable                 | Default                     | Description                                   |
+| ------------------------ | --------------------------- | --------------------------------------------- |
+| `OLLAMA_BASE_URL`        | `http://localhost:11434/v1` | Ollama API endpoint                           |
+| `OLLAMA_CHAT_MODEL`      | `llama3.1:8b`               | Model used for RAG chat                       |
+| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text`          | Model used for embeddings                     |
+| `EMBEDDING_DIMENSION`    | `768`                       | Vector dimension (must match embedding model) |
+| `DATABASE_PATH`          | `./data/engram.db`          | SQLite database file path                     |
 
 ## Schema Changes
 

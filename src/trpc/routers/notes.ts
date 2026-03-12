@@ -10,30 +10,39 @@ import { baseProcedure, createTRPCRouter } from '../init'
 
 export const notesRouter = createTRPCRouter({
   list: baseProcedure
-    .input(z.object({
-      cursor: z.object({
-        pinned: z.number().int(),
-        id: z.number(),
-      }).optional(),
-      limit: z.number().min(1).max(100).optional().default(20),
-      sortBy: z.enum(['createdAt', 'updatedAt', 'title']).optional(),
-    }).optional())
+    .input(
+      z
+        .object({
+          cursor: z
+            .object({
+              pinned: z.number().int(),
+              id: z.number(),
+            })
+            .optional(),
+          limit: z.number().min(1).max(100).optional().default(20),
+          sortBy: z.enum(['createdAt', 'updatedAt', 'title']).optional(),
+        })
+        .optional(),
+    )
     .query(async ({ input }) => {
       const limit = input?.limit ?? 20
       const cursor = input?.cursor
 
-      const secondarySort = input?.sortBy === 'title'
-        ? asc(notes.title)
-        : desc(notes[input?.sortBy ?? 'createdAt'])
+      const secondarySort =
+        input?.sortBy === 'title' ? asc(notes.title) : desc(notes[input?.sortBy ?? 'createdAt'])
       const rows = await db
         .select()
         .from(notes)
-        .where(cursor ? or(
-          sql`${notes.pinned} < ${cursor.pinned}`,
-          and(sql`${notes.pinned} = ${cursor.pinned}`, lt(notes.id, cursor.id))
-        ) : undefined)
+        .where(
+          cursor
+            ? or(
+                sql`${notes.pinned} < ${cursor.pinned}`,
+                and(sql`${notes.pinned} = ${cursor.pinned}`, lt(notes.id, cursor.id)),
+              )
+            : undefined,
+        )
         .orderBy(desc(notes.pinned), secondarySort, desc(notes.id))
-        .limit(limit + 1)  // fetch one extra to detect next page
+        .limit(limit + 1) // fetch one extra to detect next page
       if (rows.length === 0) {
         return { items: [], nextCursor: undefined }
       }
@@ -41,15 +50,14 @@ export const notesRouter = createTRPCRouter({
       const hasMore = rows.length > limit
       const items = hasMore ? rows.slice(0, limit) : rows
       const lastItem = items[items.length - 1]
-      const nextCursor = hasMore
-        ? { pinned: lastItem.pinned ? 1 : 0, id: lastItem.id }
-        : undefined
+      const nextCursor = hasMore ? { pinned: lastItem.pinned ? 1 : 0, id: lastItem.id } : undefined
 
       const noteIds = items.map((n) => n.id)
-      const noteTagsResults = await db.select({
-        noteId: noteTags.noteId,
-        name: tags.name,
-      })
+      const noteTagsResults = await db
+        .select({
+          noteId: noteTags.noteId,
+          name: tags.name,
+        })
         .from(noteTags)
         .innerJoin(tags, eq(noteTags.tagId, tags.id))
         .where(inArray(noteTags.noteId, noteIds))
@@ -67,62 +75,63 @@ export const notesRouter = createTRPCRouter({
       return { items: itemsWithTags, nextCursor }
     }),
 
-  listAll: baseProcedure
-    .query(async () => {
-      const rows = await db.select().from(notes).orderBy(desc(notes.createdAt))
-      if (rows.length === 0) {
-        return []
-      }
+  listAll: baseProcedure.query(async () => {
+    const rows = await db.select().from(notes).orderBy(desc(notes.createdAt))
+    if (rows.length === 0) {
+      return []
+    }
 
-      const noteIds = rows.map((n) => n.id)
-      const noteTagsResults = await db.select({
+    const noteIds = rows.map((n) => n.id)
+    const noteTagsResults = await db
+      .select({
         noteId: noteTags.noteId,
         name: tags.name,
       })
-        .from(noteTags)
-        .innerJoin(tags, eq(noteTags.tagId, tags.id))
-        .where(inArray(noteTags.noteId, noteIds))
+      .from(noteTags)
+      .innerJoin(tags, eq(noteTags.tagId, tags.id))
+      .where(inArray(noteTags.noteId, noteIds))
 
-      const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
-        const existing = acc.get(row.noteId) ?? []
-        acc.set(row.noteId, [...existing, row.name])
-        return acc
-      }, new Map<number, string[]>())
-      const itemsWithTags = rows.map((note) => ({
-        ...note,
-        tags: tagsByNoteId.get(note.id) ?? [],
-      }))
+    const tagsByNoteId = noteTagsResults.reduce((acc, row) => {
+      const existing = acc.get(row.noteId) ?? []
+      acc.set(row.noteId, [...existing, row.name])
+      return acc
+    }, new Map<number, string[]>())
+    const itemsWithTags = rows.map((note) => ({
+      ...note,
+      tags: tagsByNoteId.get(note.id) ?? [],
+    }))
 
-      return itemsWithTags
-    }),
+    return itemsWithTags
+  }),
 
-  getById: baseProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
-      const rows = db.select({
+  getById: baseProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+    const rows = db
+      .select({
         note: notes,
         tagName: tags.name,
       })
-        .from(notes)
-        .leftJoin(noteTags, eq(noteTags.noteId, notes.id))
-        .leftJoin(tags, eq(tags.id, noteTags.tagId))
-        .where(eq(notes.id, input.id))
-        .all()
+      .from(notes)
+      .leftJoin(noteTags, eq(noteTags.noteId, notes.id))
+      .leftJoin(tags, eq(tags.id, noteTags.tagId))
+      .where(eq(notes.id, input.id))
+      .all()
 
-      if (rows.length === 0) return null
+    if (rows.length === 0) return null
 
-      return {
-        ...rows[0].note,
-        tags: rows.map(r => r.tagName).filter(Boolean) as string[],
-      }
-    }),
+    return {
+      ...rows[0].note,
+      tags: rows.map((r) => r.tagName).filter(Boolean) as string[],
+    }
+  }),
 
   create: baseProcedure
-    .input(z.object({
-      title: z.string().min(1),
-      body: z.string().min(1),
-      tags: z.array(z.string()).optional().default([]),
-    }))
+    .input(
+      z.object({
+        title: z.string().min(1),
+        body: z.string().min(1),
+        tags: z.array(z.string()).optional().default([]),
+      }),
+    )
     .mutation(async ({ input }) => {
       const embedding = await generateNoteEmbedding(`${input.title}\n${input.body}`)
       const [note] = sqlite.transaction(() => {
@@ -134,9 +143,9 @@ export const notesRouter = createTRPCRouter({
             const tag = db.select().from(tags).where(eq(tags.name, name)).get()!
             return tag.id
           })
-          db.insert(noteTags).values(
-            tagIds.map((tagId) => ({ noteId: note.id, tagId }))
-          ).run()
+          db.insert(noteTags)
+            .values(tagIds.map((tagId) => ({ noteId: note.id, tagId })))
+            .run()
         }
         upsertEmbedding(sqlite, note.id, embedding)
         upsertFts(sqlite, note.id, input.title, input.body)
@@ -146,12 +155,14 @@ export const notesRouter = createTRPCRouter({
     }),
 
   update: baseProcedure
-    .input(z.object({
-      id: z.number(),
-      title: z.string().min(1),
-      body: z.string().min(1),
-      tags: z.array(z.string()).optional().default([]),
-    }))
+    .input(
+      z.object({
+        id: z.number(),
+        title: z.string().min(1),
+        body: z.string().min(1),
+        tags: z.array(z.string()).optional().default([]),
+      }),
+    )
     .mutation(async ({ input }) => {
       const embedding = await generateNoteEmbedding(`${input.title}\n${input.body}`)
       const [updated] = sqlite.transaction(() => {
@@ -159,7 +170,7 @@ export const notesRouter = createTRPCRouter({
           .update(notes)
           .set({
             title: input.title,
-            body: input.body
+            body: input.body,
           })
           .where(eq(notes.id, input.id))
           .returning()
@@ -173,9 +184,9 @@ export const notesRouter = createTRPCRouter({
             return tag.id
           })
           if (tagIds.length > 0) {
-            db.insert(noteTags).values(
-              tagIds.map((tagId) => ({ noteId: updated.id, tagId }))
-            ).run()
+            db.insert(noteTags)
+              .values(tagIds.map((tagId) => ({ noteId: updated.id, tagId })))
+              .run()
           }
         }
 
@@ -186,21 +197,20 @@ export const notesRouter = createTRPCRouter({
       return updated
     }),
 
-  delete: baseProcedure
-    .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      sqlite.transaction(() => {
-        deleteEmbedding(sqlite, input.id)
-        deleteFts(sqlite, input.id)
-        db.delete(notes).where(eq(notes.id, input.id)).run()
-      })()
-      return { success: true }
-    }),
+  delete: baseProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    sqlite.transaction(() => {
+      deleteEmbedding(sqlite, input.id)
+      deleteFts(sqlite, input.id)
+      db.delete(notes).where(eq(notes.id, input.id)).run()
+    })()
+    return { success: true }
+  }),
 
   pin: baseProcedure
     .input(z.object({ id: z.number(), pinned: z.boolean() }))
     .mutation(async ({ input }) => {
-      const current = db.select({ updatedAt: notes.updatedAt })
+      const current = db
+        .select({ updatedAt: notes.updatedAt })
         .from(notes)
         .where(eq(notes.id, input.id))
         .get()
@@ -213,5 +223,5 @@ export const notesRouter = createTRPCRouter({
         .returning()
         .all()
       return updated
-    })
+    }),
 })

@@ -10,12 +10,11 @@ export default meta
 type Story = StoryObj<typeof Spinner>
 
 export const DefaultSpinner: Story = {
-  args: {
-  },
+  args: {},
 }
 
 export const CustomSizeSpinner: Story = {
   args: {
-    size: 48
+    size: 48,
   },
 }

@@ -21,7 +21,10 @@ export default function ActionButton(props: ActionButtonProps) {
     return (
       <Link
         {...rest}
-        className={clsx('group flex items-center gap-0 cursor-pointer rounded-md p-1.5 text-text-faint', className)}
+        className={clsx(
+          'group flex items-center gap-0 cursor-pointer rounded-md p-1.5 text-text-faint',
+          className,
+        )}
       >
         {children}
         {label && (
@@ -37,7 +40,10 @@ export default function ActionButton(props: ActionButtonProps) {
   return (
     <button
       {...rest}
-      className={clsx('group flex items-center gap-0 cursor-pointer rounded-md p-1.5 text-text-faint', className)}
+      className={clsx(
+        'group flex items-center gap-0 cursor-pointer rounded-md p-1.5 text-text-faint',
+        className,
+      )}
     >
       {children}
       {label && (

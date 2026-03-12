@@ -30,12 +30,12 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
     key: 'Enter',
     ctrl: true,
     meta: true,
-    callback: () => onSave()
+    callback: () => onSave(),
   })
 
   useKeyboardShortcut({
     key: 'Escape',
-    callback: () => router.push('/')
+    callback: () => router.push('/'),
   })
 
   const updateNote = trpc.notes.update.useMutation({
@@ -48,7 +48,7 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
           ...old,
           pages: old.pages.map((page) => ({
             ...page,
-            items: page.items.map((n) => (n.id === input.id ? { ...n, ...input } : n))
+            items: page.items.map((n) => (n.id === input.id ? { ...n, ...input } : n)),
           })),
         }
       })
@@ -128,7 +128,10 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
         <label className="block text-sm font-medium">Tags</label>
         <div className="mt-1.5 flex flex-wrap gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2.5 shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
           {tags.map((tag) => (
-            <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-2 py-0.5 text-sm font-medium">
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 rounded-md bg-surface-secondary px-2 py-0.5 text-sm font-medium"
+            >
               {tag}
               <button
                 type="button"
@@ -168,7 +171,9 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
               Preview
             </button>
           </div>
-          <span className="text-xs text-text-faint">{readingTime.words} words · ~{readingTime.minutes} min read · {body.length} characters</span>
+          <span className="text-xs text-text-faint">
+            {readingTime.words} words · ~{readingTime.minutes} min read · {body.length} characters
+          </span>
         </div>
         {tab === 'edit' ? (
           <textarea
@@ -199,14 +204,34 @@ export function NoteForm({ initialBody, initialId, initialTitle, initialTags }: 
         {isPending ? (
           <>
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
-              <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                className="opacity-25"
+              />
+              <path
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                className="opacity-75"
+              />
             </svg>
             Saving...
           </>
         ) : (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />

@@ -31,7 +31,9 @@ export default function LayoutNavBar() {
         <div className="hidden flex-1 sm:flex gap-5 py-2">
           <NavLink href="/">Notes</NavLink>
           <NavLink href="/search">
-            <span className="flex items-center gap-1.5">Search <Kbd keys={['⌘', 'K']} /></span>
+            <span className="flex items-center gap-1.5">
+              Search <Kbd keys={['⌘', 'K']} />
+            </span>
           </NavLink>
           <NavLink href="/chat">Chat</NavLink>
         </div>

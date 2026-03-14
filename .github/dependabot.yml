@@ -7,6 +7,9 @@ updates:
     commit-message:
       prefix: 'chore'
       include: scope
+    ignore:
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

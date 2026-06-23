@@ -43,7 +43,7 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^21.0.2",
     "@storybook/addon-a11y": "^10.3.4",
-    "@storybook/addon-docs": "^10.4.5",
+    "@storybook/addon-docs": "^10.4.6",
     "@storybook/addon-vitest": "^10.4.6",
     "@storybook/nextjs-vite": "^10.3.4",
     "@tailwindcss/postcss": "^4",

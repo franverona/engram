@@ -6,15 +6,15 @@ Engram is a local-first notes app with hybrid search (FTS5 + vector) and RAG cha
 
 ## Commands
 
-- `npm run dev` — Start development server
-- `npm run build` — Production build
-- `npm start` — Run local environment via `zx ./local-env.mjs`
-- `npm run lint` — Run ESLint
-- `npm test` — Run unit tests (Vitest)
-- `npm run test:watch` — Run tests in watch mode
+- `pnpm run dev` — Start development server
+- `pnpm run build` — Production build
+- `pnpm start` — Run Ollama + dev server together via `concurrently`
+- `pnpm run lint` — Run ESLint
+- `pnpm test` — Run unit tests (Vitest)
+- `pnpm run test:watch` — Run tests in watch mode
 - `act pull_request` — Simulate the CI workflow locally (requires Docker + [act](https://github.com/nektos/act))
-- `npx drizzle-kit push` — **Broken** — see note below
-- `npx drizzle-kit studio` — **Broken** — see note below
+- `pnpm exec drizzle-kit push` — **Broken** — see note below
+- `pnpm exec drizzle-kit studio` — **Broken** — see note below
 - `docker compose up --build` — Start full stack in Docker (app + Ollama)
 - `docker compose -f docker-compose.dev.yml up` — Start only Ollama in Docker (app runs natively)
 
@@ -50,7 +50,7 @@ Engram is a local-first notes app with hybrid search (FTS5 + vector) and RAG cha
 sqlite3 ./data/engram.db "CREATE TABLE ..."
 ```
 
-After any schema change to `src/lib/db/schema.ts`, also run `npx drizzle-kit generate` to keep the migration SQL files in sync with the schema.
+After any schema change to `src/lib/db/schema.ts`, also run `pnpm exec drizzle-kit generate` to keep the migration SQL files in sync with the schema.
 
 `drizzle-kit studio` has the same problem and is also broken. `drizzle-kit generate` (generates migration SQL files without connecting to the DB) still works. To inspect the database use the `sqlite3` CLI or a GUI tool like [TablePlus](https://tableplus.com) or [DB Browser for SQLite](https://sqlitebrowser.org).
 
@@ -58,7 +58,7 @@ To reset the database from scratch:
 
 ```bash
 rm -f ./data/engram.db ./data/engram.db-shm ./data/engram.db-wal
-npx drizzle-kit generate
+pnpm exec drizzle-kit generate
 sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
 ```
 
@@ -67,8 +67,10 @@ Then restart the dev server — `initVecTable` and `initFtsTable` recreate the v
 ## Docker
 
 - `next.config.ts` has `output: 'standalone'` — required for the multi-stage Docker build to produce a lean runtime image.
-- `DATABASE_PATH=:memory:` is set in the Dockerfile builder stage so `npm run build` doesn't fail — Next.js spawns 9 parallel workers to collect page data, all of which open the same SQLite file and cause `SQLITE_BUSY` errors. In-memory databases are isolated per-worker.
+- `DATABASE_PATH=:memory:` is set in the Dockerfile builder stage so `pnpm run build` doesn't fail — Next.js spawns 9 parallel workers to collect page data, all of which open the same SQLite file and cause `SQLITE_BUSY` errors. In-memory databases are isolated per-worker.
 - The Next.js standalone dependency tracer doesn't pick up `sqlite-vec-linux-arm64` (dynamically loaded extension). It must be manually copied into the runner stage via `COPY --from=builder`.
+- `pnpm-workspace.yaml` sets `nodeLinker: hoisted`. pnpm's default (isolated) layout puts `node_modules/sqlite-vec` behind a symlink into a `.pnpm` store and never hoists `sqlite-vec-linux-arm64` (a transitive `optionalDependency`) to the top level at all — either would break the Dockerfile's `COPY --from=builder node_modules/sqlite-vec*` lines. `hoisted` mode keeps them as real top-level directories, matching npm's layout.
+- `pnpm-workspace.yaml` also sets `allowBuilds` for `better-sqlite3`, `esbuild`, `sharp`, and `unrs-resolver`. pnpm blocks install/postinstall scripts by default; without this, `better-sqlite3`'s native binding never compiles and the app fails at runtime with "Could not locate the bindings file". (Note: this config lives in `pnpm-workspace.yaml`, not `.npmrc` or package.json's `pnpm` field — pnpm 10+ moved it and silently ignores the old locations.)
 - Use `node:24-slim` (Debian/glibc), not `node:24-alpine` (musl) — pre-built binaries for `better-sqlite3` and `sqlite-vec` target glibc and won't load on Alpine.
 - `postcss.config.mjs` must NOT be excluded in `.dockerignore` — it's required at build time for Tailwind CSS to generate styles. Avoid `*.mjs` wildcards; list dev-only `.mjs` files explicitly instead.
 - On macOS, Ollama in Docker runs on CPU only (no Metal GPU). Inference is significantly slower than native. For development, prefer native Ollama or use a smaller model (`llama3.2:3b`).

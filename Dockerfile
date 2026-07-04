@@ -1,19 +1,21 @@
 # Deps Stage
 FROM node:24-slim AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 
 # Builder Stage
 FROM node:24-slim AS builder
 WORKDIR /app
+RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN mkdir -p data
 ENV DATABASE_PATH=:memory:
-RUN npm run build
+RUN pnpm run build
 
 # Runner Stage
 FROM node:24-slim AS runner

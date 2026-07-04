@@ -27,14 +27,14 @@ ollama pull nomic-embed-text
 ## Setup
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env.local   # optional — defaults work without it
-npx drizzle-kit generate      # generate migration SQL
+pnpm exec drizzle-kit generate      # generate migration SQL
 sqlite3 ./data/engram.db < drizzle/<generated-file>.sql   # apply it
-npm run dev
+pnpm run dev
 ```
 
-> **Note:** `npx drizzle-kit push` is broken — see [Schema Changes](#schema-changes) below. Use `drizzle-kit generate` + `sqlite3` instead. The virtual tables (`note_embeddings`, `note_fts`) are created automatically on server start.
+> **Note:** `pnpm exec drizzle-kit push` is broken — see [Schema Changes](#schema-changes) below. Use `drizzle-kit generate` + `sqlite3` instead. The virtual tables (`note_embeddings`, `note_fts`) are created automatically on server start.
 
 Open [http://localhost:3000](http://localhost:3000).
 
@@ -59,7 +59,7 @@ Runs only Ollama in Docker while the app runs natively. Gives full hot reload sp
 
 ```bash
 docker compose -f docker-compose.dev.yml up
-npm run dev
+pnpm run dev
 ```
 
 > **Note:** On macOS, Ollama inside Docker runs on CPU only (no Metal GPU). Inference with `llama3.1:8b` will be slow. For daily development, prefer native Ollama or switch to a smaller model via `OLLAMA_CHAT_MODEL=llama3.2:3b` in `.env.local`.
@@ -81,7 +81,7 @@ See `.env.example` for all available options. Defaults work out of the box if Ol
 `drizzle-kit push` is broken — it introspects the database without loading sqlite-vec, hits the `note_embeddings` virtual table and crashes. Use `drizzle-kit generate` to produce a SQL migration file and apply it manually:
 
 ```bash
-npx drizzle-kit generate
+pnpm exec drizzle-kit generate
 sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
 ```
 
@@ -89,15 +89,15 @@ sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
 
 ```bash
 rm -f ./data/engram.db ./data/engram.db-shm ./data/engram.db-wal
-npx drizzle-kit generate
+pnpm exec drizzle-kit generate
 sqlite3 ./data/engram.db < drizzle/<generated-file>.sql
-npm run dev   # virtual tables are recreated automatically on startup
+pnpm run dev   # virtual tables are recreated automatically on startup
 ```
 
 ## Running Tests
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Running CI Locally

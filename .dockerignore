@@ -55,7 +55,6 @@ temp
 tmp
 .actrc
 .nvmrc
-local-env.mjs
 eslint.config.mjs
 commitlint.config.mjs
 commitlint.config.mjs

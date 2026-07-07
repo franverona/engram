@@ -5,3 +5,7 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - "@ai-sdk/react@4.0.17"
+  - "ai@7.0.16"

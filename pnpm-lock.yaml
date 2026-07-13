@@ -27,8 +27,8 @@ importers:
         specifier: ^11.18.0
         version: 11.18.0(typescript@6.0.3)
       ai:
-        specifier: ^7.0.8
-        version: 7.0.16(zod@4.4.3)
+        specifier: ^7.0.22
+        version: 7.0.22(zod@4.4.3)
       better-sqlite3:
         specifier: ^12.11.1
         version: 12.11.1
@@ -182,6 +182,12 @@ packages:
 
   '@ai-sdk/gateway@4.0.12':
     resolution: {integrity: sha512-Y7Fy8xJwPz7ZC0DhSQG3HIVk+drup42hrIj6yqKlib3CxwiR0F7nYyUI8+kPrEtbZEoyKoRstvT4/o0HEyFBHA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/gateway@4.0.16':
+    resolution: {integrity: sha512-9iYxdOLquoOFk5e+02P9qfBIA+EJU0FNJvyjGxi4iXJabt2+GlbaCg7TX0sTtxOsBVkdabkatqWM6+kvp53tBg==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2297,6 +2303,12 @@ packages:
 
   ai@7.0.16:
     resolution: {integrity: sha512-OuA+uz6ZUVId+SVeB5bThi25Ofee/FmLvffAA368tlgqYCe2qAhqZUpfHL0dd9QC/iPiszdvCQYENJavSo/0gw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  ai@7.0.22:
+    resolution: {integrity: sha512-iAXYwQtR18qN7GXwNmGVAQM4uSJOh2+nZ5RP9NtDXfH5d4tlYyYzAM133O3U+eVcyWrvNRzecN9yW58xpCdfMg==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -5031,6 +5043,13 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
+  '@ai-sdk/gateway@4.0.16(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.3
+      '@ai-sdk/provider-utils': 5.0.7(zod@4.4.3)
+      '@vercel/oidc': 3.2.0
+      zod: 4.4.3
+
   '@ai-sdk/mcp@2.0.7(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.2
@@ -6818,6 +6837,13 @@ snapshots:
       '@ai-sdk/gateway': 4.0.12(zod@4.4.3)
       '@ai-sdk/provider': 4.0.2
       '@ai-sdk/provider-utils': 5.0.5(zod@4.4.3)
+      zod: 4.4.3
+
+  ai@7.0.22(zod@4.4.3):
+    dependencies:
+      '@ai-sdk/gateway': 4.0.16(zod@4.4.3)
+      '@ai-sdk/provider': 4.0.3
+      '@ai-sdk/provider-utils': 5.0.7(zod@4.4.3)
       zod: 4.4.3
 
   ajv@6.15.0:

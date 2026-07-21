@@ -68,7 +68,7 @@
     "lint-staged": "^17.0.8",
     "playwright": "^1.61.1",
     "prettier": "^3.9.5",
-    "storybook": "^10.5.0",
+    "storybook": "^10.5.2",
     "tailwindcss": "^4",
     "typescript": "^6",
     "vite": "^8.1.4",

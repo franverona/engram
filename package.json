@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.20",
-    "@ai-sdk/react": "^4.0.51",
+    "@ai-sdk/react": "^4.0.61",
     "@tanstack/react-query": "^5.101.4",
     "@trpc/client": "^11.18.0",
     "@trpc/react-query": "^11.18.0",

@@ -54,7 +54,7 @@
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@typescript-eslint/parser": "^8.65.0",
+    "@typescript-eslint/parser": "^8.66.0",
     "@vitest/browser-playwright": "^4.1.10",
     "@vitest/coverage-v8": "^4.1.10",
     "concurrently": "^10.0.4",

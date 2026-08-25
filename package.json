@@ -16,7 +16,7 @@
     "build-storybook": "STORYBOOK_DISABLE_TELEMETRY=true storybook build"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^3.0.30",
+    "@ai-sdk/openai-compatible": "^3.0.35",
     "@ai-sdk/react": "^4.0.69",
     "@tanstack/react-query": "^5.101.4",
     "@trpc/client": "^11.18.0",
